@@ -15,6 +15,8 @@ The plugins read Pollis' panels from the public Pollis repository, `saragga/poll
 - the panel index, `build/pollis/panel-index.json`, written by `node build/pollis/makePanelIndex.ts`;
 - Pollis' panel TOML parser as plain JavaScript, `build/pollis/pollisToml.mjs`, written by `node build/pollis/makePollisToml.ts`, so the validator and the builder read a panel exactly as Pollis does.
 
+The index names the toolboxes' files under `toolboxes/`; the scripts read those from [Trumpingtons/pollis-toolboxes](https://github.com/Trumpingtons/pollis-toolboxes) on `main`.
+
 A change to the index format there needs the matching change to the scripts here.
 
 The plugins need only Node.js 22 or later on the user's computer: no npm packages.

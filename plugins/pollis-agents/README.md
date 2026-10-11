@@ -47,7 +47,7 @@ panel = "ht"
 title = "3. Hypothesis Tests"
 ```
 
-`menu` is Compose (formerly Toolboxes), Explore, Model, Simulate, Optimise or the id of a submenu; `inline = true` puts the entries straight into that menu instead of a submenu of their own. The full format is at the top of `scripts/makeToolbox.mjs`.
+`menu` is Extend (the default), Explore, Model, Simulate, Optimise or the id of a submenu; `inline = true` puts the entries straight into that menu instead of a submenu of their own. The full format is at the top of `scripts/makeToolbox.mjs`.
 
 You can also run the builder yourself:
 

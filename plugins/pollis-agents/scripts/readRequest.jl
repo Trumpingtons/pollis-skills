@@ -21,13 +21,13 @@
 #
 # toolbox: name (pollis-toolbox-...), displayName, and optional description, author, version.
 # panel:   topic, methods (1 to 8: the tabs), and optional audience, packages, menu, title, id,
-#          notes (anything else the agent should know). menu is a top menu (Compose, Explore,
+#          notes (anything else the agent should know). menu is a top menu (Extend, Explore,
 #          Model, Simulate, Optimise) or a submenu id, then optionally "> " and the title of a
-#          submenu to put the panel in; default "Compose > <displayName>".
+#          submenu to put the panel in; default "Extend > <displayName>".
 
 using TOML
 
-const TOP_MENUS = ("Compose", "Toolboxes", "Explore", "Model", "Simulate", "Optimise")
+const TOP_MENUS = ("Extend", "Explore", "Model", "Simulate", "Optimise", "Compose", "Toolboxes")  # Compose and Toolboxes: older requests, placed in Extend
 const ID_PATTERN = r"^[a-z0-9][a-z0-9-]*$"
 const TOOLBOX = Dict{String,Any}()
 const PANELS = Dict{String,Any}[]
@@ -119,7 +119,7 @@ function main(args)
 		count(==(topic), topics) > 1 && fail("the topic \"$topic\" is requested more than once")
 	end
 	for panel in PANELS
-		haskey(panel, "menu") || (panel["menu"] = "Compose > " * TOOLBOX["displayName"])
+		haskey(panel, "menu") || (panel["menu"] = "Extend > " * TOOLBOX["displayName"])
 	end
 	request = Dict("toolbox" => TOOLBOX, "panel" => PANELS)
 	output = endswith(file, ".toml") ? file : string(splitext(file)[1], ".request.toml")

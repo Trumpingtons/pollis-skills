@@ -18,6 +18,9 @@ import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export const DEFAULT_SOURCE = 'https://raw.githubusercontent.com/saragga/pollis/main/';
+/** The toolboxes' sources, which the index names under toolboxes/ (a local Pollis checkout has them cloned there). */
+const TOOLBOXES_SOURCE = 'https://raw.githubusercontent.com/Trumpingtons/pollis-toolboxes/main/';
+const TOOLBOXES_PREFIX = 'toolboxes/';
 const INDEX_PATH = 'build/pollis/panel-index.json';
 const PARSER_PATH = 'build/pollis/pollisToml.mjs';
 
@@ -52,7 +55,8 @@ export class Source {
 		if (this.local) {
 			return fs.promises.readFile(path.join(this.location, ...file.split('/')));
 		}
-		const url = this.location + file.split('/').map(encodeURIComponent).join('/');
+		const [base, relative] = file.startsWith(TOOLBOXES_PREFIX) ? [TOOLBOXES_SOURCE, file.slice(TOOLBOXES_PREFIX.length)] : [this.location, file];
+		const url = base + relative.split('/').map(encodeURIComponent).join('/');
 		let lastError;
 		for (let attempt = 0; attempt < 3; attempt++) {
 			try {
