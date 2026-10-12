@@ -1,12 +1,12 @@
-# Pollis Plugins
+# Pollis Skills
 
-Agent plugins for [Pollis](https://github.com/saragga/pollis), the desktop environment for statistical modelling, simulation and optimisation built on Code - OSS and Julia.
+Agent skills for [Pollis](https://github.com/saragga/pollis), the desktop environment for statistical modelling, simulation and optimisation built on Code - OSS and Julia.
 
-This repository is a plugin marketplace (`.claude-plugin/marketplace.json`). Pollis starts the Pollis Agents skills from its **Compose > Pollis Agents** menu, with the coding agent the user picks: it downloads the files listed in `plugins/pollis-agents/files.json`, so a file added to the plugin must be listed there too. Claude Code users can also add the marketplace directly: `/plugin marketplace add Trumpingtons/pollis-plugins`.
+This repository is a plugin marketplace (`.claude-plugin/marketplace.json`). Pollis starts the Pollis Agents skills from its **Compose > Pollis Agents** menu, with the coding agent the user picks: it downloads the files listed in `plugins/pollis-agents/files.json`, so a file added to the plugin must be listed there too. Claude Code users can also add the marketplace directly: `/plugin marketplace add Trumpingtons/pollis-skills`.
 
 | Plugin | What it does |
 |---|---|
-| [pollis-agents](plugins/pollis-agents/README.md) | Builds your own Pollis toolbox from the panels you pick, in the menus and order you want, as a `.vsix` to install or share (for example, one toolbox per course), and creates new panels on topics Pollis does not cover. |
+| [pollis-agents](plugins/pollis-agents/README.md) | Builds your own Pollis toolbox from the panels you pick, in the menus and order you want, as a `.vsix` to install or share (for example, one toolbox per course), creates new panels on topics Pollis does not cover, writes new methods that reproduce their articles' tables and prepares them for the Pollis registry, and cites references the Pollis way. |
 
 ## For developers
 

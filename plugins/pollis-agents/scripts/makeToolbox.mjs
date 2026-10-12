@@ -18,7 +18,7 @@
 // again, e.g. after its README was edited.
 //
 // Pollis' files are read from https://raw.githubusercontent.com/saragga/pollis/main/ (this plugin
-// lives in another repository, Trumpingtons/pollis-plugins): first the panel index
+// lives in another repository, Trumpingtons/pollis-skills): first the panel index
 // (build/pollis/panel-index.json, written there by build/pollis/makePanelIndex.ts, whose
 // renameMaterialFolders in panelResolver.ts renames folders as this script does), which resolves
 // every menu entry to its panel, then only the

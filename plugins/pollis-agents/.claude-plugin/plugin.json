@@ -5,8 +5,8 @@
 	"author": {
 		"name": "Antonio Saragga Seabra"
 	},
-	"homepage": "https://github.com/Trumpingtons/pollis-plugins/tree/main/plugins/pollis-agents",
-	"repository": "https://github.com/Trumpingtons/pollis-plugins",
+	"homepage": "https://github.com/Trumpingtons/pollis-skills/tree/main/plugins/pollis-agents",
+	"repository": "https://github.com/Trumpingtons/pollis-skills",
 	"license": "AGPL-3.0-or-later",
 	"keywords": ["pollis", "toolbox", "extension", "panel", "teaching"]
 }
