@@ -10,7 +10,7 @@ Writes a new Pollis panel from what the user tells you: a topic, the models or m
 Two files of this plugin do the mechanical work:
 
 - `reference.md`, next to this SKILL.md: the panel format, every section with an example, the wiki and notebook formats, the content rules, and the Pollis panels to copy the shape of. **Read it before writing anything.**
-- `validatePanel.mjs`, in the `scripts` folder of this plugin: two folders up from this SKILL.md, then `scripts/` (this file is `<plugin>/skills/create-panel/SKILL.md`). It checks a panel with Pollis' own parser, downloaded from the public Pollis repository. Use its absolute path, quoted.
+- `validatePanel.mjs`, in the `scripts` folder of this plugin: two folders up from this SKILL.md, then `scripts/` (this file is `<plugin>/skills/create-panel/SKILL.md`). If there is no `scripts` folder there (the skills were installed on their own, in `~/.agents/skills`), it is `~/.pollis/agents/pollis-agents/scripts`. It checks a panel with Pollis' own parser, downloaded from the public Pollis repository. Use its absolute path, quoted.
 
 It needs Node.js 22 or later (`node --version`) and the internet; if Node is missing or older, tell the user to install it from nodejs.org and stop.
 

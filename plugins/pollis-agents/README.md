@@ -1,18 +1,19 @@
 # Pollis Agents
 
-An agent plugin for Pollis with five skills:
+An agent plugin for Pollis with six skills:
 
 - **Package a toolbox**: you pick Pollis panels, put them in the menus and the order you want, and get a `.vsix` file to install in Pollis or to share. A teacher, for example, packages the panels of a course as one toolbox, in their own menu and order, and gives the file to their students.
 - **Create a panel**: you describe a topic Pollis does not cover, and the agent writes a new panel for it, with its wiki pages and notebook tutorials, checks it, and packages it in a toolbox.
 - **Write a method**: in a method folder made with **Compose > New Methods > Create Method...** (the article, the data and the published tables), the agent writes the Julia code that reproduces the tables to the digits printed, tested with Pollis' package script.
+- **Write a vignette**: the agent writes a method's vignette, two pages in LaTeX in the method folder: the problem, the method, every tested value beside the published one, what is still open, and the references. **Compose > New Methods > Package and Publish...** puts it in the package.
 - **Prepare a method for registration**: the agent brings a method up to the Pollis registry rules (a name of at least 5 characters, a usage example, a docstring for every exported name) without changing what it computes.
-- **References**: how Pollis documents cite their sources, in wikis, notebooks and LaTeX: Author (year) with every author written out, linked to its entry in the References, each entry from the Pollis library (`pollis.bib`) with its DOI link. Run it from **Compose > Pollis Skills > Browse Skills...**.
+- **References**: how Pollis documents cite their sources, in wikis, notebooks and LaTeX: Author (year) with every author written out, linked to its entry in the References, each entry from the Pollis library (`pollis.bib`) with its DOI link. Run it from **Compose > Agents and Skills > Browse Skills...**.
 
 Each panel in the toolbox is an independent copy of the Pollis panel, with its key points, decision table, example code, Next Steps, wikis and notebook tutorials. It has its own editor tab and its own wiki and notebook folders, so Pollis' own panels stay as they are.
 
 ## Install the plugin
 
-In Pollis, there is nothing to install: use **Compose > Pollis Agents** (**Create a Panel...**, **Package a Toolbox...**, **Write a Method...**, **Prepare for Registration...**). Pollis downloads the skills (the files listed in `files.json`) to `~/.pollis/agents/pollis-agents` and starts a coding agent in a terminal, pointed at the skill. The first time, it asks which agent to use: Claude Code, Codex, Gemini CLI, GitHub Copilot CLI, Cursor Agent, OpenCode or Goose (the last two can also run on local models, through Ollama or LM Studio), or any other command; change it later with **Pollis Agents: Choose Coding Agent...**. Creating a panel asks a lot of the model: a small local model will make mistakes the validator cannot catch.
+In Pollis, there is nothing to install: use **Compose > New Panels and Toolboxes** (**Create a Panel...**, **Create Panels from a Request...**, **Package a Toolbox...**) and **Compose > New Methods** (**Write a Method...**, **Write a Vignette...**, **Prepare for Registration...**). Pollis downloads the skills (the files listed in `files.json`) to `~/.pollis/agents/pollis-agents` and starts a coding agent in a terminal, pointed at the skill. The first time, it asks which agent to use: Claude Code, Codex, GitHub Copilot CLI or OpenCode, each on a cloud model or a local one, or any other command; change it later with **Compose > Agents and Skills > Choose Coding Agent...**. To use the skills in your agent outside Pollis, choose **Compose > Agents and Skills > Install Skills in Coding Agent...**: Claude Code gets the plugin from its marketplace, the other agents get the skill folders in `~/.agents/skills`. Creating a panel asks a lot of the model: a small local model will make mistakes the validator cannot catch.
 
 In Claude Code, the plugin can also be installed directly: `/plugin marketplace add Trumpingtons/pollis-skills`, then `/plugin install pollis-agents@pollis`.
 

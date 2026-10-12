@@ -7,7 +7,7 @@ description: "Package a toolbox: build a Pollis toolbox (a .vsix extension) from
 
 Builds a Pollis toolbox from a spec: a list of Pollis menu entries (the panels) and the menus and order they go in. The result is a `.vsix` file the user installs in Pollis with **Extensions: Install from VSIX...**, or gives to others (a teacher to their students, say). A toolbox has no code: its panels are copies of Pollis panels with their wikis and notebook tutorials.
 
-The mechanical work is done by the builder script, `makeToolbox.mjs`, in the `scripts` folder of this plugin: two folders up from this SKILL.md, then `scripts/` (this file is `<plugin>/skills/package-toolbox/SKILL.md`, the script is `<plugin>/scripts/makeToolbox.mjs`). Use its absolute path in the commands below, quoted. You do the parts that need judgment.
+The mechanical work is done by the builder script, `makeToolbox.mjs`, in the `scripts` folder of this plugin: two folders up from this SKILL.md, then `scripts/` (this file is `<plugin>/skills/package-toolbox/SKILL.md`, the script is `<plugin>/scripts/makeToolbox.mjs`). If there is no `scripts` folder there (the skills were installed on their own, in `~/.agents/skills`), it is `~/.pollis/agents/pollis-agents/scripts`. Use its absolute path in the commands below, quoted. You do the parts that need judgment.
 
 It needs Node.js 22 or later (`node --version`); if Node is missing or older, tell the user to install it from nodejs.org and stop. It reads Pollis' panels from the public Pollis repository on GitHub, so it needs the internet; nothing is installed and Pollis itself is not changed.
 

@@ -14,7 +14,7 @@ Read `reference.md`, next to this SKILL.md, before anything else: the method fol
 The first message from Pollis names the method folder and gives the test command, with its paths. If it does not (the skill was started some other way):
 
 - **The folder**: the current folder if it has a `method.toml`; else list the folders of `~/.pollis/methods` that have one, and ask which.
-- **The test command**: ask the user to start this task from Pollis instead, with **Compose > Pollis Agents > Write a Method...**, which gives it. Do not look for Pollis' script yourself.
+- **The test command**: ask the user to start this task from Pollis instead, with **Compose > New Methods > Write a Method...**, which gives it. Do not look for Pollis' script yourself.
 
 It needs Julia (`julia --version`) and the internet, to read the article and download the data. If Julia is missing, tell the user to install it with juliaup and stop.
 
@@ -27,7 +27,7 @@ It needs Julia (`julia --version`) and the internet, to read the article and dow
 5. **Run the test command** and read the output. A failure names the target (its `source`), the row and the column. Fix the code, not the targets: a target is what the article printed. If a value in a target looks mistyped (a digit swapped compared with the article), show the user both and let them correct it.
 6. **When values stay off**, compare yours with the printed ones, value by value, rounded to the digits printed: say how far each is, in units of the last digit. Look for the usual causes first: the sample (missing values, the years used), the degrees of freedom, the variance estimator, the starting values or the optimiser of an iterative estimate, the random seed of a simulation. If the article cannot be reproduced exactly (a value off by one in the last digit after all of these, say), tell the user which values, by how much, and what you checked, and let them decide whether to raise that target's `tolerance`.
 7. **Add a usage example** to method.toml: `usage = """..."""`, Julia code that loads the data and calls the method, as a user would. It goes in the package's README.
-8. **Report**: for each target, the values reproduced and those not, with the values side by side (yours, rounded to the digits printed, and the article's), never just "identical" or "matches"; the tolerance of each target; what you assumed where the article was unclear. Then the next steps: **Compose > Pollis Agents > Prepare for Registration...** if the test output lists registry rules still broken, and **Compose > New Methods > Package and Publish...** to publish.
+8. **Report**: for each target, the values reproduced and those not, with the values side by side (yours, rounded to the digits printed, and the article's), never just "identical" or "matches"; the tolerance of each target; what you assumed where the article was unclear. Then the next steps: **Compose > New Methods > Prepare for Registration...** if the test output lists registry rules still broken, and **Compose > New Methods > Package and Publish...** to publish.
 
 ## Rules
 

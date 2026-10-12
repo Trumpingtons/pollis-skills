@@ -1,0 +1,52 @@
+% Vignette of the Pollis method NAME
+% Compile with: julia -e 'using PollisTeX; display(compile("NAME.tex"))'
+\input{vignette_style}
+\renewcommand{\vignetteauthor}{AUTHOR}
+\renewcommand{\vignettedate}{DATE}
+
+\begin{document}
+
+\nmhead{SHORT NAME}
+  {What the method does, in one line}
+  {The article it comes from, reproduced.}
+
+\factsheet
+  {\nmcite{key}{Author (year)}, \emph{Journal}: the tables and pages tested. The data, and where it comes from.}
+  {what no Julia package does, and what the packages used do instead.}
+  {\package{NAME}{https://github.com/OWNER/NAME.jl}}
+  {how many printed values are reproduced, to how many digits; the closest and the furthest.}
+
+\nmsection{The problem}
+The question the article asked, the data it asked it of, and why the usual tools do not answer it.
+
+\nmsection{The method}
+\nmsub{The first part}
+What it computes, in a few equations, and the choices the article makes (estimator, corrections, sample).
+\nmsub{The second part}
+Each exported function, named with \fn{function}, and what it returns.
+
+\nmsection{What the tests show}
+\begin{valuetable}{@{}lXrrc@{}}
+\textbf{Source} & \textbf{Value} & \textbf{Published} & \textbf{Julia} & \\\midrule
+Table 2, p.\,12 & coefficient of x & 0.512 & 0.512 & \ok\\
+Table 2, p.\,12 & standard error of x & 0.047 & 0.048 & \no\\
+\end{valuetable}
+\nmsub{Where they differ}
+Each value that is off: by how much, in units of the last digit printed, and what was checked.
+
+\nmsection{Still open}
+What the article does that the method does not reproduce yet, and why.
+
+\nmsection{Further considerations}
+\begin{itemize}
+  \item \textbf{A limit.} Where the method should not be used.
+  \item \textbf{An extension.} What would follow, and the published test it would need.
+\end{itemize}
+
+\nmsection{References}
+{\footnotesize
+\nmref{key}{Author, A. and Author, B. (year). Title. \emph{Journal} volume(issue), pages. \nmdoi{10.xxxx/xxxxx}}
+}
+
+\nmcredit
+\end{document}
