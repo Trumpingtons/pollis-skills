@@ -15,7 +15,6 @@ NAME/
   INSTRUCTIONS.md   the user's notes for the agent: what the method does, where in the article, what to watch for
   VIGNETTE.md       the user's notes for the vignette: its look, its sections, the LaTeX style, the vignettes to follow
   vignette/NAME.tex the vignette (the write-vignette skill), its PDF beside it
-  notebook/*.ipynb  a method made from a notebook (the method-from-notebook skill): the user's copy of it
 ```
 
 ## method.toml
