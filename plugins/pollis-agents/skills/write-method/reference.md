@@ -1,6 +1,6 @@
 # The Pollis method format
 
-A Pollis method is a published statistical method turned into a Julia package whose tests are the article's own tables. The user makes the method's folder in Pollis with **Compose > New Methods > Create Method...**: they name it, link the article and the data, and type in the published tables. The coding agent writes the code (the `write-method` skill) and brings it up to the registry rules (the `prepare-method` skill). **Compose > New Methods > Package and Publish...** then makes the package, runs its tests and, when the user asks, pushes it to GitHub and registers it in the Pollis registry.
+A Pollis method is a published statistical method turned into a Julia package whose tests are the article's own tables. The user makes the method's folder on its page in Pollis (**Compose > New Methods > Create Methods**; **Browse Methods** reopens it later): they link the article and the data, type in the published tables (or ask the coding agent to, from the article) and name it. The coding agent writes the code (the `write-method` skill) and brings it up to the registry rules (the `prepare-method` skill). Package and Publish, the last step of the method's page, then makes the package, runs its tests and, when the user asks, pushes it to GitHub and registers it in the Pollis registry.
 
 ## The folder
 
@@ -11,7 +11,11 @@ NAME/
   method.toml       the method: its name, the article, the inputs, the targets and their calls
   src/NAME.jl       the code: module NAME
   targets/*.csv     the published tables the code must reproduce, typed in as printed
+  inputs/*.csv      input tables typed in from the article (the other inputs are links)
   INSTRUCTIONS.md   the user's notes for the agent: what the method does, where in the article, what to watch for
+  VIGNETTE.md       the user's notes for the vignette: its look, its sections, the LaTeX style, the vignettes to follow
+  vignette/NAME.tex the vignette (the write-vignette skill), its PDF beside it
+  notebook/*.ipynb  a method made from a notebook (the method-from-notebook skill): the user's copy of it
 ```
 
 ## method.toml
@@ -19,6 +23,7 @@ NAME/
 ```toml
 name = "Grunfeld"                  # the package name: a capital letter, then letters and digits
 title = "Panel regressions of Grunfeld's investment data"
+vignette_title = ""                # the vignette's title, when it is not the title
 author = "Ana Silva"
 description = "Pooled, fixed and random effects estimates of the investment equation."
 version = "0.1.0"                  # optional, default 0.1.0
@@ -36,7 +41,7 @@ fixed_effects(data)
 """
 
 [inputs.grunfeld]                  # an input table: a variable named grunfeld in the calls
-url = "https://raw.githubusercontent.com/..."
+url = "https://raw.githubusercontent.com/..."   # or file = "inputs/grunfeld.csv", a table of the method
 source = "Where the data comes from"
 delim = ","                        # the default; or ";", "tab", "whitespace"
 columns = ["firm", "year", "I"]    # only for a file without a header line
@@ -77,7 +82,7 @@ end
 end
 ```
 
-Pollis' Create Method writes a stub, `estimate(data)`, which errors. Replace it.
+Pollis writes a stub when it makes the method,, `estimate(data)`, which errors. Replace it.
 
 ## The test command
 
