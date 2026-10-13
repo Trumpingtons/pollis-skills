@@ -5,26 +5,27 @@ description: "Write the vignette of a Pollis method: a two-page LaTeX document, 
 
 # Write a Vignette
 
-Writes the vignette of a Pollis method: about two pages that a reader can trust without running anything. What the article asked, what the method computes, every value the tests check beside the published one, what is still open, and the references. The method's folder was made in Pollis (**Compose > New Methods > Create Method...**) and its code written with the write-method skill; read `../write-method/reference.md` for the method folder, method.toml and the test command.
+Writes the vignette of a Pollis method: about two pages that a reader can trust without running anything. What the article asked, what the method computes, every value the tests check beside the published one, what is still open, and the references. The method's folder was made in Pollis (**Compose > New Methods > Create Methods**) and its code written with the write-method skill; read `../write-method/reference.md` for the method folder, method.toml and the test command.
 
-The vignette is `vignette/NAME.tex` in the method folder (NAME is the method's `name`), with its PDF beside it. **Compose > New Methods > Package and Publish...** puts it in the package.
+The vignette is `vignette/NAME.tex` in the method folder (NAME is the method's `name`), with its PDF beside it. Package and Publish, on the method's page, puts it in the package.
 
 ## What you are given
 
 The first message from Pollis names the method folder and gives the test command, with its paths. If it does not (the skill was started some other way):
 
 - **The folder**: the current folder if it has a `method.toml`; else list the folders of `~/.pollis/methods` that have one, and ask which.
-- **The test command**: ask the user to start this task from Pollis instead, with **Compose > New Methods > Write a Vignette...**, which gives it.
+- **The test command**: ask the user to start this task from Pollis instead, with Write Vignette on the method's page (**Compose > New Methods > Browse Methods**, then the method's title), which gives it.
 
 Next to this SKILL.md are `vignette_style.tex` (the look: fonts, colours, the macros below) and `template.tex` (the sections, to fill in).
 
 ## Steps
 
-1. **Read the method**: `method.toml`, `INSTRUCTIONS.md`, `src/NAME.jl` and every `targets/*.csv`. Read the article from its link (`article`, else `https://doi.org/` and the `doi`). Do not save a copy of the article or the data.
-2. **Run the test command.** If a target fails because the code is wrong or missing, stop: tell the user to finish the method first (**Compose > New Methods > Write a Method...**). A vignette describes a tested method; it is never written before the tests run.
+1. **Read the method**: `method.toml`, `INSTRUCTIONS.md`, `VIGNETTE.md` if it exists, `src/NAME.jl`, every `targets/*.csv` and every `inputs/*.csv`. `VIGNETTE.md` holds the user's notes for the vignette (its look, its sections, the LaTeX style, the vignettes to follow): follow them wherever they do not break the rules below. Read the article from its link (`article`, else `https://doi.org/` and the `doi`). Do not save a copy of the article or the data.
+2. **Run the test command.** If a target fails because the code is wrong or missing, stop: tell the user to finish the method first (Write Method, on the method's page). A vignette describes a tested method; it is never written before the tests run.
 3. **Get the values**: the test command prints `Packaging NAME in FOLDER`; its `test/runtests.jl` shows how the inputs are read. In that package's environment, evaluate each target's `call` and round each value to the digits the article printed. These are the Julia column of the value table: never type one in, never copy one from the target as if it were computed.
 4. **Write the vignette**: make `vignette/` in the method folder, copy `vignette_style.tex` into it, copy `template.tex` to `vignette/NAME.tex`, and fill it in:
    - `\vignetteauthor` from `author` in method.toml, `\vignettedate` today's date written out (12 October 2026). If method.toml has a `license`, set `\vignettelicense` to it.
+   - The title is `vignette_title` in method.toml, else `title`.
    - `\nmhead{short name}{what it does, one line}{the article, reproduced}`.
    - `\factsheet{tested against}{missing in Julia}{package}{result}`: the article, its tables and pages, and the data; what no Julia package did (check the registered packages before saying so) and what the packages used do instead; `\package{NAME}{URL}` with the GitHub URL if it is published, else `\fn{NAME.jl}`; how many printed values are reproduced, to how many digits.
    - **The problem**: the question the article asked, of which data, and why the usual tools do not answer it.
@@ -41,7 +42,7 @@ Next to this SKILL.md are `vignette_style.tex` (the look: fonts, colours, the ma
 
    If PollisTeX is missing, add it first with `julia -e 'import Pkg; Pkg.add(url = "https://github.com/Trumpingtons/PollisTeX.jl")'`. It prints `PDF: ...`, then only the problems, as `error: file.tex:LINE: message`. Fix each error at its line; never open the `.log`. Compile at most five times; if errors remain, stop and list them. Delete the auxiliary files it leaves (keep only `NAME.tex`, `vignette_style.tex` and `NAME.pdf`).
 6. **Keep it to two pages.** If it runs over, shorten the prose, never the value table, and compile again.
-7. **Report**: where the PDF is, how many values the table shows and how many agree, and anything you could not settle from the article. Then the next step: **Compose > New Methods > Package and Publish...**.
+7. **Report**: where the PDF is, how many values the table shows and how many agree, and anything you could not settle from the article. Then the next step: **Package and Publish**, on the method's page.
 
 ## Macros
 
