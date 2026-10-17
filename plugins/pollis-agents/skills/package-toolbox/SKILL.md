@@ -35,10 +35,8 @@ author = "Ana Silva"                 # optional: shown in Pollis as the publishe
 
 [[menu]]                             # one or more
 id = "stats101"
-title = "Statistics 101"             # the submenu's title
-menu = "Model"                       # Extend (default), Explore, Model, Simulate, Optimise or a submenu id
-group = "2_toolboxes"                # optional: where the submenu goes in that menu
-order = 1
+title = "Statistics 101"             # the submenu's title, at the end of Extend
+order = 1                            # optional: the order among the toolboxes there
 
 [[menu.items]]                       # the entries, in the order wanted
 command = "chiara.statistics.lm"     # the menu entry's command (from list), or panel = "lm", or toml = "garch.toml"
@@ -47,7 +45,7 @@ title = "1. Linear Regression"       # optional: the menu title, default the one
 
 - **Origin**: each `[[menu.items]]` names a menu entry by its `command`, or the panel by `panel = "<id>"`. The user names entries by their menu titles: find them with `list` and say which command you chose when there is more than one match. A command that opens a panel on a given model (shown by `list`) opens the copy on that model too.
 - **A panel of the user's own** (written by the `create-panel` skill, or by hand) is `toml = "<path>"`, relative to the spec: its id is the file name, and its `wiki/` and `notebooks/` folders next to it are copied with it. The build checks it with the validator first and stops on an error: fix it with the `create-panel` skill's reference, then build again.
-- **Destination**: `menu` is a top-level menu or a submenu id (from `list`). `inline = true` puts the entries straight into that menu, without a submenu; they then take the menu's `group`. Items take `group` and `order` too (default: their position).
+- **Destination**: a toolbox does not choose its menu. Its submenu goes at the end of Extend, and the user can move it, or any of its panels, to another menu with the toolbox's Edit button. `inline = true` puts the entries straight into Extend, without a submenu. Items take `group` and `order` (default: their position).
 - Optional `prefix` in `[extension]` (default: the name without `pollis-toolbox-`) names the copies: panel `<prefix>.<id>`, wiki and notebook folders `<prefix>.<folder>`.
 
 ## Steps

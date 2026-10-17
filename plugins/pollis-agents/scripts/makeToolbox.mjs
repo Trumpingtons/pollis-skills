@@ -39,19 +39,17 @@
 //   author = "Ana Silva"                   optional: shown in Pollis as the toolbox's publisher (default: pollis)
 //   prefix = "stats101"                    optional, default: the name without pollis-toolbox-
 //
-//   [[menu]]                               one or more: where the entries go
+//   [[menu]]                               one or more: a submenu at the end of Extend (the user can move it)
 //   id = "stats101"
 //   title = "Statistics 101"               the submenu's title
-//   menu = "Model"                         Extend (the default), Explore, Model, Simulate, Optimise or a submenu id
-//   inline = false                         true: the entries go straight into that menu, no submenu
-//   group = "2_toolboxes"                  optional, the group and order of the submenu in that menu
-//   order = 4
+//   inline = false                         true: the entries go straight into Extend, no submenu
+//   order = 4                              optional, the order among the toolboxes at the end of Extend
 //
 //   [[menu.items]]                         the entries, in the order wanted
 //   command = "chiara.statistics.lm"       the origin menu entry's command, or panel = "lm", or
 //                                          toml = "garch.toml", a panel of your own (below)
 //   title = "Linear Regression"            optional menu title, default: the origin's menu title
-//   group = "1_panels"                     optional, default "1_panels" (inline: the menu's group)
+//   group = "1_panels"                     optional, default "1_panels"
 //   order = 1                              optional, default: the position in the list
 //
 // A panel of your own (the create-panel skill writes them) is a panel TOML, relative to the spec,
@@ -161,14 +159,6 @@ function resolveItem(index, item) {
 		return { panel, command: panel.commands.find(c => !c.model) ?? panel.commands[0] };
 	}
 	fail('every [[menu.items]] needs a command or a panel');
-}
-
-/** @param {PanelIndex} index @param {string} menu */
-function checkMenu(index, menu) {
-	const lower = menu.toLowerCase();
-	if (!index.menus.topLevel.some(top => top.toLowerCase() === lower) && !index.menus.submenus.includes(menu)) {
-		fail(`the menu ${menu} does not exist (use ${index.menus.topLevel.join(', ')} or a submenu id)`);
-	}
 }
 
 /**
@@ -363,15 +353,13 @@ async function build(source, specFile, outDir, overwrite) {
 	/** @type {{ from: string; to: string }[]} */
 	const downloads = [];
 	const toolboxes = [];
+	/** @type {{ title: string; packages: string[] }[]} */
 	const readmeRows = [];
 	/** @type {{ id: string; title: string; summary: string; write: () => Promise<void> }[]} */
 	const copies = [];
 	for (const menu of menus) {
 		if (typeof menu.id !== 'string' || typeof menu.title !== 'string') {
 			fail('every [[menu]] needs an id and a title');
-		}
-		if (typeof menu.menu === 'string') {
-			checkMenu(index, menu.menu);
 		}
 		const items = /** @type {TomlTable[]} */ (Array.isArray(menu.items) ? menu.items : []);
 		if (!items.length) {
@@ -394,20 +382,18 @@ async function build(source, specFile, outDir, overwrite) {
 				command: `pollis.${name}.${copy.panelId}`,
 				title: copy.title,
 				...(menuTitle && menuTitle !== copy.title ? { menuTitle } : {}),
-				group: typeof item.group === 'string' ? item.group : menu.inline === true && typeof menu.group === 'string' ? menu.group : '1_panels',
+				group: typeof item.group === 'string' ? item.group : '1_panels',
 				order: typeof item.order === 'number' ? item.order : position + 1,
 				data: `panels/${id}.toml`,
 				defaultModel: copy.defaultModel,
 				...(copy.decisionFirstColumn ? { decisionFirstColumn: copy.decisionFirstColumn } : {}),
 			});
-			readmeRows.push(`| ${menuTitle ?? copy.title} | TODO | ${copy.packages.join(', ')} |`);
+			readmeRows.push({ title: menuTitle ?? copy.title, packages: copy.packages });
 		}
 		toolboxes.push({
 			id: menu.id,
 			title: menu.title,
-			...(typeof menu.menu === 'string' ? { menu: menu.menu } : {}),
 			...(menu.inline === true ? { inline: true } : {}),
-			...(typeof menu.group === 'string' ? { group: menu.group } : {}),
 			...(typeof menu.order === 'number' ? { order: menu.order } : {}),
 			panels,
 		});
@@ -429,6 +415,18 @@ async function build(source, specFile, outDir, overwrite) {
 	}
 	writeFile(path.join(folder, 'icon.png'), await source.read(index.icon));
 
+	// Each package's web page, from the [[packages]] of the panels' TOMLs, for the README's links
+	const packageUrls = new Map();
+	for (const file of fs.readdirSync(path.join(folder, 'panels')).filter(name => name.endsWith('.toml'))) {
+		for (const pkg of tables(parser.parseToml(fs.readFileSync(path.join(folder, 'panels', file), 'utf-8')).packages)) {
+			const url = pkg.github ?? pkg.url ?? pkg.docs;
+			if (typeof pkg.name === 'string' && typeof url === 'string' && !packageUrls.has(pkg.name)) {
+				packageUrls.set(pkg.name, url);
+			}
+		}
+	}
+	const packageLink = (/** @type {string} */ name) => packageUrls.has(name) ? `[${name}](${packageUrls.get(name)})` : name;
+
 	const manifest = {
 		name,
 		displayName: extension.displayName,
@@ -444,22 +442,19 @@ async function build(source, specFile, outDir, overwrite) {
 	};
 	writeFile(path.join(folder, 'package.json'), JSON.stringify(manifest, null, 2) + '\n');
 
-	const where = toolboxes.map(toolbox => {
-		const parent = toolbox.menu ?? 'Extend';
-		return toolbox.inline ? `adds its panels to the **${parent}** menu` : `adds the **${toolbox.title}** submenu to the **${parent}** menu`;
-	}).join(', and ');
+	const where = toolboxes.map(toolbox => toolbox.inline ? 'adds its panels to the end of the **Extend** menu' : `adds the **${toolbox.title}** submenu to the end of the **Extend** menu`).join(', and ');
 	writeFile(path.join(folder, 'README.md'), [
 		`# ${extension.displayName}`,
 		'',
 		manifest.description,
 		'',
-		`Installing it ${where}. Each panel has key points, a decision table, example code you can send to the Julia REPL or a notebook, reference wikis and notebook tutorials.`,
+		`Installing it ${where}; its **Edit** button in the Installed section of the Extensions pane moves it, or any of its panels, to another menu. Each panel has key points, a decision table, example code you can send to the Julia REPL or a notebook, reference wikis and notebook tutorials.`,
 		'',
 		'## Panels',
 		'',
 		'| Panel | What it covers | Powered by |',
 		'|---|---|---|',
-		...readmeRows,
+		...readmeRows.map(row => `| ${row.title} | TODO | ${row.packages.map(packageLink).join(', ')} |`),
 		'',
 		'## Requirements',
 		'',

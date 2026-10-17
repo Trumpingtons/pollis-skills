@@ -2,7 +2,7 @@
 
 An agent plugin for Pollis with six skills:
 
-- **Package a toolbox**: you pick Pollis panels, put them in the menus and the order you want, and get a `.vsix` file to install in Pollis or to share. A teacher, for example, packages the panels of a course as one toolbox, in their own menu and order, and gives the file to their students.
+- **Package a toolbox**: you pick Pollis panels, put them in the order you want, and get a `.vsix` file to install in Pollis or to share. A teacher, for example, packages the panels of a course as one toolbox, in their own submenu and order, and gives the file to their students.
 - **Create a panel**: you describe a topic Pollis does not cover, and the agent writes a new panel for it, with its wiki pages and notebook tutorials, checks it, and packages it in a toolbox.
 - **Write a method**: in a method folder made on its page in Pollis (**Compose > New Methods > Create Methods**: the article, the data and the published tables), the agent writes the Julia code that reproduces the tables to the digits printed, tested with Pollis' package script.
 - **Write a vignette**: the agent writes a method's vignette, two pages in LaTeX in the method folder: the problem, the method, every tested value beside the published one, what is still open, and the references. Package and Publish, on the method's page, puts it in the package.
@@ -23,7 +23,7 @@ Either way, the skills need Node.js 22 or later on your computer, and the intern
 
 Ask the chat agent, for example:
 
-> Make a toolbox called "Statistics 101" with Linear Regression, Generalized Linear Models and Hypothesis Tests, in that order, in a submenu of the Model menu.
+> Make a toolbox called "Statistics 101" with Linear Regression, Generalized Linear Models and Hypothesis Tests, in that order.
 
 The agent finds the panels, writes a spec like the one below, shows it to you, builds the toolbox, writes its README with you and packages it.
 
@@ -36,7 +36,6 @@ description = "The panels of the Statistics 101 course: regression, generalized 
 [[menu]]
 id = "stats101"
 title = "Statistics 101"
-menu = "Model"
 
 [[menu.items]]
 command = "chiara.statistics.lm"
@@ -51,7 +50,7 @@ panel = "ht"
 title = "3. Hypothesis Tests"
 ```
 
-`menu` is Extend (the default), Explore, Model, Simulate, Optimise or the id of a submenu; `inline = true` puts the entries straight into that menu instead of a submenu of their own. The full format is at the top of `scripts/makeToolbox.mjs`.
+A toolbox does not choose its menu: its submenu goes at the end of Extend, and the user can move it, or any of its panels, to another menu with its Edit button. `inline = true` puts the entries straight into Extend instead of a submenu of their own. The full format is at the top of `scripts/makeToolbox.mjs`.
 
 You can also run the builder yourself:
 
@@ -111,7 +110,7 @@ Then ask the agent: *Create the panels of panels.jl.* It runs the file with `scr
 
 ## Install the toolbox
 
-In Pollis, run **Extensions: Install from VSIX...** from the Command Palette and pick the `.vsix` file. The toolbox's menu appears at once. Students install the file their teacher gives them the same way. To update a toolbox, raise `version` in the spec, build it again and install the new file; to remove it, uninstall it in the Extensions pane.
+In Pollis, run **Extensions: Install from VSIX...** from the Command Palette and pick the `.vsix` file. The toolbox's menu appears at once at the end of Extend; its **Edit** button in the Installed section of the Extensions pane moves it, or any of its panels, to another menu. Students install the file their teacher gives them the same way. To update a toolbox, raise `version` in the spec, build it again and install the new file; to remove it, uninstall it in the Extensions pane.
 
 Panels that have their own code (the data connectors to Excel workbooks, the European Central Bank, Alpha Vantage, Yahoo Finance, FRED, EDGAR, Hugging Face and Kaggle) and the galleries cannot go in a toolbox.
 
