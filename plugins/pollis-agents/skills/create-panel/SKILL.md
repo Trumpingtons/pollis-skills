@@ -26,8 +26,8 @@ Ask in one message, and wait for the answers:
 - the topic, and who the panel is for (a course, a research group, the user's own work);
 - the models or methods it covers: they become the tabs of the panel (one to eight);
 - the Julia packages to use, if the user has a preference;
-- the folder to write it in (default: a new folder `pollis-panels/` in the current directory);
-- whether it goes into a new toolbox or an existing toolbox spec.
+- the folder to write it in (default: `pollis-panels/` in the toolboxes folder, `~/.pollis/toolboxes/`, or in the open folder when it is a Pollis Workspace, with a `pollis.toml` file);
+- whether it goes into a new toolbox or an existing toolbox spec, and where to publish that toolbox: nowhere, a GitHub repository of the user's own, or proposed for the Toolboxes section of Pollis (the `package-toolbox` skill asks the details, step 6).
 
 Then propose, in a short list: the panel id (lower case letters, digits and hyphens, short: `garch`, `survival`), its title, the model ids and labels, the inputs of each model, and the Next Steps. Go on when the user agrees.
 
@@ -65,7 +65,7 @@ Then, without asking:
 - **Fit the panel to the audience**: for `students` (or a course), plain key points, few inputs with defaults that work, wiki pages that explain from first principles, a notebook that goes slowly; for `research` (or researchers), more options and diagnostics, the primary papers in the references; anything else, read it as the user's description of who will use the panel. With no audience, write for a general user of Pollis.
 - **When a panel cannot be written** (no working Julia package for a method, the validator or Julia still failing after you fixed what you could), leave it out, say why in the report, and go on with the next.
 - **Pick up where a run stopped**: a long request can outlast one session. Before writing a panel, look in `pollis-panels/` for its TOML, which you start with the comment line `# Request topic: <topic>`: if it is there and the validator reports no errors, keep it and go on to the next. Tell the user how many panels were already done.
-- Write the panels in a folder `pollis-panels/` next to the request file, and the toolbox spec next to the request file, as `<toolbox name>.toml`.
+- Write the panels in a folder `pollis-panels/`, and the toolbox spec next to it as `<toolbox name>.toml`, in the toolboxes folder `~/.pollis/toolboxes/` (create it when missing), or in the open folder when it is a Pollis Workspace (it has a `pollis.toml` file), or in the folder the request file names. Report the full paths.
 
 ## 2. Write
 

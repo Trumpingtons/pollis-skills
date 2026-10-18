@@ -35,7 +35,7 @@
 //   name = "pollis-toolbox-stats101"       extension name and folder: lower case letters, digits, hyphens
 //   displayName = "Statistics 101"
 //   description = "..."
-//   version = "1.0.0"                      optional, default 1.0.0
+//   version = "0.1.0"                      optional, default 0.1.0
 //   author = "Ana Silva"                   optional: shown in Pollis as the toolbox's publisher (default: pollis)
 //   prefix = "stats101"                    optional, default: the name without pollis-toolbox-
 //
@@ -326,7 +326,7 @@ async function build(source, specFile, outDir, overwrite) {
 	if (!NAME.test(prefix)) {
 		fail(`the prefix ${prefix} must be lower case letters, digits and hyphens`);
 	}
-	const version = typeof extension.version === 'string' ? extension.version : '1.0.0';
+	const version = typeof extension.version === 'string' ? extension.version : '0.1.0';
 	if (!/^\d+\.\d+\.\d+$/.test(version)) {
 		fail(`the version ${version} must look like 1.0.0`);
 	}

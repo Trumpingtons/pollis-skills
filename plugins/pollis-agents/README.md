@@ -56,7 +56,7 @@ You can also run the builder yourself:
 
 ```
 node scripts/makeToolbox.mjs list regression          # find panels and their commands
-node scripts/makeToolbox.mjs build stats101.toml      # writes pollis-toolbox-stats101/ and pollis-toolbox-stats101-1.0.0.vsix
+node scripts/makeToolbox.mjs build stats101.toml      # writes pollis-toolbox-stats101/ and pollis-toolbox-stats101-0.1.0.vsix
 node scripts/makeToolbox.mjs pack pollis-toolbox-stats101   # package again after editing its README
 ```
 
