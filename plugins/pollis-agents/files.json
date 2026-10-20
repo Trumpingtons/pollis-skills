@@ -3,6 +3,10 @@
 	"files": [
 		"skills/create-panel/SKILL.md",
 		"skills/create-panel/reference.md",
+		"skills/email-alerts/SKILL.md",
+		"skills/email-alerts/reference.md",
+		"skills/journal-metrics/SKILL.md",
+		"skills/journal-metrics/reference.md",
 		"skills/package-toolbox/SKILL.md",
 		"skills/prepare-method/SKILL.md",
 		"skills/references/SKILL.md",

@@ -1,12 +1,14 @@
 # Pollis Agents
 
-An agent plugin for Pollis with six skills:
+An agent plugin for Pollis with eight skills:
 
 - **Package a toolbox**: you pick Pollis panels, put them in the order you want, and get a `.vsix` file to install in Pollis or to share. A teacher, for example, packages the panels of a course as one toolbox, in their own submenu and order, and gives the file to their students.
 - **Create a panel**: you describe a topic Pollis does not cover, and the agent writes a new panel for it, with its wiki pages and notebook tutorials, checks it, and packages it in a toolbox.
 - **Write a method**: in a method folder made on its page in Pollis (**Compose > New Methods > Create Methods**: the article, the data and the published tables), the agent writes the Julia code that reproduces the tables to the digits printed, tested with Pollis' package script.
 - **Write a vignette**: the agent writes a method's vignette, two pages in LaTeX in the method folder: the problem, the method, every tested value beside the published one, what is still open, and the references. Package and Publish, on the method's page, puts it in the package.
 - **Prepare a method for registration**: the agent brings a method up to the Pollis registry rules (a name of at least 5 characters, a usage example, a docstring for every exported name) without changing what it computes.
+- **Email Alerts**: the agent helps you set up alerts at Google Scholar, JSTOR, HeinOnline, Nexis Uni, SSRN, Semantic Scholar, Web of Science, Scopus, Westlaw and Factiva, with precise searches in each source's syntax, sent to your own alerts mailbox, which Pollis reads on your computer and turns into one feed per alert (**Explore > Monitor > RSS Feeds > Add Feed > Email Alerts...**). Run it from **Compose > Agent Skills**.
+- **Journal Metrics**: the agent helps you choose journal metrics for your field (SJR from SCImago, SNIP from CWTS, CiteScore from Scopus, the Impact Factor from Journal Citation Reports), download each file for your own use, and import it in the PollisJournals database on your computer (**Databases view > PollisJournals > Import Journal Metrics...**); then it answers your questions about journals with SQL. Pollis never ships or shares these files. Run it from **Compose > Agent Skills**.
 - **References**: how Pollis documents cite their sources, in wikis, notebooks and LaTeX: Author (year) with every author written out, linked to its entry in the References, each entry from the Pollis library (`pollis.bib`) with its DOI link. Run it from **Compose > Agent Skills**.
 
 Each panel in the toolbox is an independent copy of the Pollis panel, with its key points, decision table, example code, Next Steps, wikis and notebook tutorials. It has its own editor tab and its own wiki and notebook folders, so Pollis' own panels stay as they are.
@@ -116,4 +118,4 @@ Panels that have their own code (the data connectors to Excel workbooks, the Eur
 
 ## License
 
-AGPL-3.0-or-later.
+AGPL-3.0.

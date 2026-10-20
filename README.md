@@ -23,4 +23,4 @@ The plugins need only Node.js 22 or later on the user's computer: no npm package
 
 ## License
 
-AGPL-3.0-or-later, see [LICENSE.txt](LICENSE.txt).
+AGPL-3.0, see [LICENSE.txt](LICENSE.txt).
