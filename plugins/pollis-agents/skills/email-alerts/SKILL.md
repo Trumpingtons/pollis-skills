@@ -1,11 +1,11 @@
 ---
 name: email-alerts
-description: "Set up email alerts at Google Scholar, JSTOR, HeinOnline, Nexis Uni, SSRN, Semantic Scholar, Web of Science, Scopus, Westlaw and Factiva, sent to the user's own alerts mailbox, which Pollis reads and turns into one RSS feed per alert (Explore > Monitor > RSS Feeds > Add Feed > Email Alerts...). Writes precise searches in each source's syntax, so the alerts bring few false hits. Triggers include 'set up a Google Scholar alert', 'get alerts from JSTOR in Pollis', 'turn my search into a feed', 'my alerts bring too much noise', 'set up my alerts mailbox', 'follow new papers on a topic by email'."
+description: "Set up email alerts at Google Scholar, JSTOR, HeinOnline, Nexis Uni, SSRN, Semantic Scholar, Web of Science, Scopus, Westlaw and Factiva, sent to the user's own alerts mailbox, which Pollis reads and turns into one RSS feed per alert (Explore > RSS > Add Feed > Email Alerts...). Writes precise searches in each source's syntax, so the alerts bring few false hits. Triggers include 'set up a Google Scholar alert', 'get alerts from JSTOR in Pollis', 'turn my search into a feed', 'my alerts bring too much noise', 'set up my alerts mailbox', 'follow new papers on a topic by email'."
 ---
 
 # Email Alerts
 
-Many sources of articles, cases and news send the results of a saved search only by email. Pollis turns those emails into feeds: the user sends the alerts to an address of their own, the **alerts mailbox**, and Pollis reads it on their computer over IMAP, read only, making one feed per alert under the topic **Email Alerts** of **Explore > Monitor > RSS Feeds**. Nothing passes through Pollis or any other service.
+Many sources of articles, cases and news send the results of a saved search only by email. Pollis turns those emails into feeds: the user sends the alerts to an address of their own, the **alerts mailbox**, and Pollis reads it on their computer over IMAP, read only, making one feed per alert under the topic **Email Alerts** of **Explore > RSS > RSS Feeds**. Nothing passes through Pollis or any other service.
 
 You help the user (1) set up the alerts mailbox, (2) write a precise search for each topic, in the syntax of the source, and (3) create the alert at the source, sent to the alerts mailbox. The user does every click and every login: never ask for a password, and never enter one.
 
@@ -17,7 +17,7 @@ Ask whether the user already has an address for alerts. If not, recommend a new 
 
 1. Create the account. Turn on **2-Step Verification** (myaccount.google.com > Security), then make an **app password** at myaccount.google.com/apppasswords: Pollis uses it instead of the account's password. IMAP is on in Gmail by default.
 2. iCloud Mail and Yahoo Mail also need an app password; Fastmail and most university or work mail servers take the usual password, or an app password if 2-step login is on. Outlook.com and Hotmail accounts do **not** work: Microsoft no longer lets programs open them with a password.
-3. In Pollis: **Explore > Monitor > RSS Feeds > Add Feed > Alerts Mailbox...**: the address, the IMAP server (Pollis suggests it for Gmail, iCloud, Yahoo, Fastmail and GMX) and the app password, which Pollis keeps in the system's keychain.
+3. In Pollis: **Explore > RSS > Add Feed > Alerts Mailbox...**: the address, the IMAP server (Pollis suggests it for Gmail, iCloud, Yahoo, Fastmail and GMX) and the app password, which Pollis keeps in the system's keychain.
 
 Pollis reads the folder INBOX. If the user files the alerts into another folder or Gmail label, set `pollis.rss.alertsMailbox` > `folder` in the settings to its name.
 

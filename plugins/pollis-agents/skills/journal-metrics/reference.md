@@ -17,6 +17,13 @@ For each source: who can use it, what it measures, how to download the file Poll
 - **Download**: at journalindicators.com, **Downloads**, then the Excel file of all the indicators. One file has every year, from 1999, with a `Year` column: about 600,000 rows, 30 to 50 MB. It is released once a year (`CWTS Journal Indicators March 2026.xlsx`).
 - **Import**: takes a minute or two; the notification counts the rows as it goes.
 
+## ABDC Journal Quality List
+
+- **Access**: free, no account. From the Australian Business Deans Council.
+- **Measures**: a rating of about 2,700 journals of business, economics, accounting, finance, management and related fields: **A\*** (the best), **A**, **B** or **C**, by expert panels, reviewed every three years (the 2025 list is the latest). Not a citation metric: journals outside the list are not rated, which says nothing of them.
+- **Download**: at abdc.edu.au, **ABDC Journal Quality List**, the Excel file of the latest list (`ABDC-JQL-2025-....xlsx`). Its first sheet is the latest edition, with a `2025 rating` column; the other sheets are the earlier editions, which Pollis does not read.
+- **Watch for**: `category` is the Field of Research (FoR) code of the journal (`FoR 3502`, banking, finance and investment), not a name.
+
 ## Scopus (CiteScore)
 
 - **Access**: a free Elsevier account is enough for the source list with its metrics; the user's institution may give full Scopus.
@@ -35,4 +42,4 @@ For each source: who can use it, what it measures, how to download the file Poll
 
 - **OpenAlex**, built into `journals`, without any import: works, citations, `mean_citedness_2yr` (close to a two-year impact factor, for every journal), `h_index`, `i10_index`, open access, DOAJ and article charges (`apc_usd`).
 - **The Norwegian register**, also built in (`norwegian_register`, `norwegian_levels`): the level of about 40,000 journals and series each year, under NLOD 2.0.
-- **Not importable** in Pollis today: Google Scholar Metrics (h5-index; no download), the Chartered ABS Academic Journal Guide, the ABDC list, the Finnish levels (JUFO), ERIH PLUS. If the user needs one of these, look the journals up with them on the source's site.
+- **Not importable** in Pollis today: Google Scholar Metrics (h5-index; no download), the Chartered ABS Academic Journal Guide, the Finnish levels (JUFO), ERIH PLUS. If the user needs one of these, look the journals up with them on the source's site.
