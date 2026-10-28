@@ -20,7 +20,7 @@ node "<plugin>/scripts/makeToolbox.mjs" pack <folder>/<name>
 ```
 
 - `list` prints the panels whose id, title, menu title or command contain all the words, with their commands and menu titles; a panel marked NOT PORTABLE cannot go in a toolbox (it has its own code), with the reason. `list` alone also prints the menus a toolbox can go in.
-- `build` writes `<folder>/<name>/` (package.json, panels/, wiki/, notebooks/, icon.png, README.md) and `<folder>/<name>-<version>.vsix`.
+- `build` writes `<folder>/<name>/` (package.json, panels/, wiki/, notebooks/, docs/ when it has documentation, icon.png, README.md) and `<folder>/<name>-<version>.vsix`.
 - `pack` packages a toolbox folder again, after its README was edited; the `.vsix` is written next to the folder.
 
 ## The spec
@@ -41,11 +41,17 @@ order = 1                            # optional: the order among the toolboxes t
 [[menu.items]]                       # the entries, in the order wanted
 command = "chiara.statistics.lm"     # the menu entry's command (from list), or panel = "lm", or toml = "garch.toml"
 title = "1. Linear Regression"       # optional: the menu title, default the one in Pollis
+
+[[menu.documents]]                   # optional, one or more: the toolbox's documentation
+title = "Statistics 101 Course Notes"
+description = "The course's notes, with the exercises of each week."   # optional
+source = "notes/stats101.tex"        # the main .tex file, relative to the spec
 ```
 
 - **Origin**: each `[[menu.items]]` names a menu entry by its `command`, or the panel by `panel = "<id>"`. The user names entries by their menu titles: find them with `list` and say which command you chose when there is more than one match. A command that opens a panel on a given model (shown by `list`) opens the copy on that model too.
 - **A panel of the user's own** (written by the `create-panel` skill, or by hand) is `toml = "<path>"`, relative to the spec: its id is the file name, and its `wiki/` and `notebooks/` folders next to it are copied with it. The build checks it with the validator first and stops on an error: fix it with the `create-panel` skill's reference, then build again.
 - **Destination**: a toolbox does not choose its menu. Its submenu goes at the end of Extend, and the user can move it, or any of its panels, to another menu with the toolbox's Edit button. `inline = true` puts the entries straight into Extend, without a submenu. Items take `group` and `order` (default: their position).
+- **Documentation**: a toolbox can bring its own documents, which Pollis lists in **Help > Documentation > Toolboxes** and compiles with PollisTeX (the XeTeX of Tectonic) the first time one is opened. Each `[[menu.documents]]` names the main `.tex` file (letters, digits, `-` and `_` in its name); the build copies the `.tex` and `.bib` files of its folder and its `resources/` folder (images, `.png` or `.jpg`) into `docs/<main file's name>/`. The sources must compile with XeTeX: `fontspec` rather than `inputenc`, no shell escape. The user writes the documents, or asks you to; do not invent their content.
 - Optional `prefix` in `[extension]` (default: the name without `pollis-toolbox-`) names the copies: panel `<prefix>.<id>`, wiki and notebook folders `<prefix>.<folder>`.
 
 ## Where the toolbox is saved
@@ -54,7 +60,7 @@ In the toolboxes folder, `~/.pollis/toolboxes/` (create it when missing), next t
 
 ## Steps
 
-1. **Understand the request.** Find each panel the user names with `list`; if a name matches several panels or none, ask. If something is missing (name, display name, description, the author to show as publisher, where the entries go, their order), ask once, offering sensible defaults. In the same message, ask where to publish it (step 6): nowhere (the `.vsix` only, the default); in a GitHub repository of the user's own, and if so the account or organisation, the repository name (default: the toolbox name) and public or private (default: public); or proposed for the Toolboxes section of Pollis, as a pull request to the Pollis toolboxes repository. Do not invent a description: ask, or propose one for approval.
+1. **Understand the request.** Find each panel the user names with `list`; if a name matches several panels or none, ask. If something is missing (name, display name, description, the author to show as publisher, where the entries go, their order, whether the toolbox comes with documentation and, if so, where its main `.tex` file is), ask once, offering sensible defaults. In the same message, ask where to publish it (step 6): nowhere (the `.vsix` only, the default); in a GitHub repository of the user's own, and if so the account or organisation, the repository name (default: the toolbox name) and public or private (default: public); or proposed for the Toolboxes section of Pollis, as a pull request to the Pollis toolboxes repository. Do not invent a description: ask, or propose one for approval.
 2. **Write the spec** as `<name>.toml` in the toolboxes folder (see *Where the toolbox is saved*), and show it.
 3. **Run `build`** with `--out` that folder (`--overwrite` only when the user agreed to replace an existing toolbox folder of that name). It stops with a clear message on what cannot be packaged: a NOT PORTABLE panel, a panel of the user's own with errors, a gallery or dialog (not a panel), an unknown command, panel or menu, a panel listed twice. Report it, and continue without the entry only if the user agrees.
 4. **Finish the README** (`<folder>/<name>/README.md`): fill the "What it covers" column, one short line per panel, from the panel's TOML in `<folder>/<name>/panels/` (its models and key points), for example "Ordinary, weighted and robust least squares, with diagnostics". Keep the rest. Show it to the user, then run `pack` on the toolbox folder.
@@ -72,7 +78,7 @@ In the toolboxes folder, `~/.pollis/toolboxes/` (create it when missing), next t
    **Proposed for the Toolboxes section of Pollis**, as a pull request to https://github.com/Trumpingtons/pollis-toolboxes (read its CONTRIBUTING.md first: one toolbox folder per pull request, version 0.1.0 for a new toolbox, the checks it runs). In the toolboxes folder:
    - `gh repo view Trumpingtons/pollis-toolboxes --json viewerPermission`: if it is `ADMIN`, `MAINTAIN` or `WRITE`, the user maintains it: clone it (`gh repo clone Trumpingtons/pollis-toolboxes`) instead of forking, and the pull request below becomes a commit to main, which publishes the toolbox at once; say so and ask before pushing.
    - Otherwise `gh repo fork Trumpingtons/pollis-toolboxes --clone`, and in the clone `git pull upstream main` to start from its latest state.
-   - Copy the toolbox folder into the clone, without the `.vsix` and the spec: `package.json`, `README.md`, the icon, `panels/`, `wiki/` and `notebooks/`. Add the toolbox's row to the table in the clone's `README.md`, like the other rows.
+   - Copy the toolbox folder into the clone, without the `.vsix` and the spec: `package.json`, `README.md`, the icon, `panels/`, `wiki/`, `notebooks/` and `docs/`. Add the toolbox's row to the table in the clone's `README.md`, like the other rows.
    - Run the check the pull request will run, and fix every error before going on: `node scripts/checkToolboxes.ts --validator <this plugin>/scripts/validatePanel.mjs --base upstream/main` (`--base origin/main` in a maintainer's clone).
    - Show the user what will be sent, then commit (`<displayName> <version>`), `git push origin main`, and `gh pr create --repo Trumpingtons/pollis-toolboxes --head <the user's account>:main --title "<displayName> <version>" --body "<filled from .github/pull_request_template.md>"`.
 

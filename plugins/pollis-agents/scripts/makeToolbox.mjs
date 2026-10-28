@@ -13,7 +13,7 @@
 //   node makeToolbox.mjs pack <toolbox folder> [--out <dir>]
 //   any command: [--source <url or folder>]           where Pollis' files are read from
 //
-// build writes <out>/<name>/ (package.json, panels/, wiki/, notebooks/, icon.png, README.md) and
+// build writes <out>/<name>/ (package.json, panels/, wiki/, notebooks/, docs/, icon.png, README.md) and
 // <out>/<name>-<version>.vsix; <out> defaults to the current folder. pack packages a toolbox folder
 // again, e.g. after its README was edited.
 //
@@ -51,6 +51,13 @@
 //   title = "Linear Regression"            optional menu title, default: the origin's menu title
 //   group = "1_panels"                     optional, default "1_panels"
 //   order = 1                              optional, default: the position in the list
+//
+//   [[menu.documents]]                     optional: the toolbox's documentation, in Help > Documentation > Toolboxes
+//   title = "Statistics 101 Course Notes"
+//   description = "..."                    optional, a sentence or two
+//   source = "notes/stats101.tex"          the main .tex file, relative to the spec; its folder's .tex and .bib
+//                                          files and its resources/ folder are copied to docs/<main file's name>/,
+//                                          and Pollis compiles the document with PollisTeX when it is first opened
 //
 // A panel of your own (the create-panel skill writes them) is a panel TOML, relative to the spec,
 // whose id is its file name (garch.toml: garch). Its wiki and notebook files are looked for in
@@ -297,6 +304,29 @@ function localPanel(file, { parser, index, prefix, folder, claimFolder }) {
 	};
 }
 
+/**
+ * Copies a document's sources, the folder's top-level .tex and .bib files and its resources/ folder, as Pollis
+ * compiles them (compile_vignette.jl), and returns how many files were copied.
+ * @param {string} source @param {string} to
+ */
+function copyDocument(source, to) {
+	const from = path.dirname(source);
+	fs.mkdirSync(to, { recursive: true });
+	let files = 0;
+	for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
+		if (entry.isFile() && /\.(tex|bib)$/.test(entry.name)) {
+			fs.copyFileSync(path.join(from, entry.name), path.join(to, entry.name));
+			files++;
+		}
+	}
+	const resources = path.join(from, 'resources');
+	if (fs.existsSync(resources)) {
+		fs.cpSync(resources, path.join(to, 'resources'), { recursive: true });
+		files += fs.readdirSync(path.join(to, 'resources'), { recursive: true }).length;
+	}
+	return files;
+}
+
 /** @param {string} file */
 function writeFile(file, /** @type {string | Buffer} */ data) {
 	fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -357,6 +387,8 @@ async function build(source, specFile, outDir, overwrite) {
 	const readmeRows = [];
 	/** @type {{ id: string; title: string; summary: string; write: () => Promise<void> }[]} */
 	const copies = [];
+	/** @type {{ title: string; description: string; name: string; source: string }[]} */
+	const documentCopies = [];
 	for (const menu of menus) {
 		if (typeof menu.id !== 'string' || typeof menu.title !== 'string') {
 			fail('every [[menu]] needs an id and a title');
@@ -390,12 +422,34 @@ async function build(source, specFile, outDir, overwrite) {
 			});
 			readmeRows.push({ title: menuTitle ?? copy.title, packages: copy.packages });
 		}
+		const documents = [];
+		for (const document of tables(menu.documents)) {
+			if (typeof document.title !== 'string' || typeof document.source !== 'string') {
+				fail(`every [[menu.documents]] of ${menu.id} needs a title and a source`);
+			}
+			const source = path.resolve(path.dirname(specFile), document.source);
+			const documentName = path.basename(source, '.tex');
+			if (!/^[A-Za-z0-9_-]+\.tex$/.test(path.basename(source)) || !fs.existsSync(source)) {
+				fail(`the document ${document.title} names ${document.source}, which is not a .tex file that exists`);
+			}
+			if (documentCopies.some(copy => copy.name === documentName)) {
+				fail(`two documents have the main file ${documentName}.tex`);
+			}
+			const description = typeof document.description === 'string' ? document.description : '';
+			documentCopies.push({ title: document.title, description, name: documentName, source });
+			documents.push({
+				title: document.title,
+				...(description ? { description } : {}),
+				source: `docs/${documentName}/${documentName}.tex`,
+			});
+		}
 		toolboxes.push({
 			id: menu.id,
 			title: menu.title,
 			...(menu.inline === true ? { inline: true } : {}),
 			...(typeof menu.order === 'number' ? { order: menu.order } : {}),
 			panels,
+			...(documents.length ? { documents } : {}),
 		});
 	}
 
@@ -414,6 +468,11 @@ async function build(source, specFile, outDir, overwrite) {
 		process.stderr.write('\n');
 	}
 	writeFile(path.join(folder, 'icon.png'), await source.read(index.icon));
+	/** @type {string[]} */
+	const documentSummaries = [];
+	for (const document of documentCopies) {
+		documentSummaries.push(`docs/${document.name}: ${document.title} (${copyDocument(document.source, path.join(folder, 'docs', document.name))} files)`);
+	}
 
 	// Each package's web page, from the [[packages]] of the panels' TOMLs, for the README's links
 	const packageUrls = new Map();
@@ -456,6 +515,14 @@ async function build(source, specFile, outDir, overwrite) {
 		'|---|---|---|',
 		...readmeRows.map(row => `| ${row.title} | TODO | ${row.packages.map(packageLink).join(', ')} |`),
 		'',
+		...(documentCopies.length ? [
+			'## Documentation',
+			'',
+			'In **Help > Documentation > Toolboxes**, compiled from its LaTeX sources the first time it is opened:',
+			'',
+			...documentCopies.map(document => `- **${document.title}**${document.description ? `: ${document.description}` : ''}`),
+			'',
+		] : []),
 		'## Requirements',
 		'',
 		'Pollis and Julia. Each panel lists the Julia packages it uses on its Powered by line and offers to install the missing ones.',
@@ -468,6 +535,9 @@ async function build(source, specFile, outDir, overwrite) {
 
 	for (const copy of copies) {
 		console.log(`${copy.id}: ${copy.title} (${copy.summary})`);
+	}
+	for (const summary of documentSummaries) {
+		console.log(summary);
 	}
 	console.log(`Wrote ${folder}/ (${copies.length} panels).`);
 	return folder;
@@ -583,6 +653,9 @@ const CONTENT_TYPES = {
 	'.txt': 'text/plain',
 	'.png': 'image/png',
 	'.svg': 'image/svg+xml',
+	'.jpg': 'image/jpeg',
+	'.tex': 'text/plain',
+	'.bib': 'text/plain',
 };
 
 /** @param {string[]} names */
