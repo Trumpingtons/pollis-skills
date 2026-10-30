@@ -291,6 +291,16 @@ bundled = true
 
 A page on the web instead of a file: `bundled = false` and `url = "https://..."`. Wiki pages are Markdown with `$...$` and `$$...$$` math. They are general reference: they never use the panel's example data. End each page with a `## See Also` list of links to the other pages.
 
+**Wikis are read by embeddings.** Ask Pollis cuts each wiki at its headings into passages, about 250 words at most, and gives a model each passage alone, under its headings. `## References` and `## See Also` are left out. So:
+
+- Keep each `##` section to one topic, in 60 to 250 words. A shorter one is joined with the next, a longer one cut.
+- Make a heading say what the section answers, in the words someone would ask with.
+- Name things in full. Never open a section with "it", "this" or "these", and write "the Linear Regression panel", never "this panel", "this page", "this webview", "above" or "see below".
+- Use the panel's exact labels, as the search by words matches them.
+- Give a table labelled columns and rows that read alone, each row becoming `Column: value; Column: value`, with one topic to a table.
+- Cite a work with a long list of authors once, at a sentence's end.
+- Do not repeat a sentence across panels: near-copies take the places of other passages. Say whose it is ("a FRED key", not "the key").
+
 ## notebookSections
 
 The notebook tutorials, in sections:

@@ -80,7 +80,7 @@ notebooks/<id>/tutorial-01-<topic>.ipynb   at least one
 
 - **The Example Code** of every model runs as it is: simulated data with a fixed seed, or a dataset from PollisDatasets.jl. Use the packages' current API: read their documentation when unsure, never guess a function name or a keyword.
 - **The Next Steps** go in the order Visualise, Diagnose, Predict, Compare, Interpret, and use the variables of the Example Code.
-- **The wiki pages** are general reference: the method, its equations, assumptions and pitfalls, never the panel's example data. Each ends with `## See Also`.
+- **The wiki pages** are general reference: the method, its equations, assumptions and pitfalls, never the panel's example data. Each ends with `## See Also`. Every wiki also ends in embeddings for Ask Pollis, so each section must be found and read alone: see "Wikis are read by embeddings" in `reference.md`.
 - **The notebooks** walk through an example step by step, with Markdown cells between the code cells, and no outputs.
 - **References**: only real papers and books, with their real details. If unsure of one, leave it out.
 
