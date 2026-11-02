@@ -45,12 +45,19 @@
 //   inline = false                         true: the entries go straight into Extend, no submenu
 //   order = 4                              optional, the order among the toolboxes at the end of Extend
 //
+//   [[menu.submenus]]                      optional: a submenu of this menu, which holds the entries that name it
+//   id = "basics"                          not with inline = true
+//   title = "The Basics"
+//   group = "1_panels"                     the group in this menu
+//   order = 1                              the order in that group
+//
 //   [[menu.items]]                         the entries, in the order wanted
 //   command = "chiara.statistics.lm"       the origin menu entry's command, or panel = "lm", or
 //                                          toml = "garch.toml", a panel of your own (below)
 //   title = "Linear Regression"            optional menu title, default: the origin's menu title
 //   group = "1_panels"                     optional, default "1_panels"
 //   order = 1                              optional, default: the position in the list
+//   submenu = "basics"                     optional, the id of a [[menu.submenus]]: group and order then apply in it
 //
 //   [[menu.documents]]                     optional: the toolbox's documentation, in Help > Documentation > Toolboxes
 //   title = "Statistics 101 Course Notes"
@@ -397,8 +404,20 @@ async function build(source, specFile, outDir, overwrite) {
 		if (!items.length) {
 			fail(`the menu ${menu.id} has no [[menu.items]]`);
 		}
+		const submenus = tables(menu.submenus);
+		if (submenus.length && menu.inline === true) {
+			fail(`the menu ${menu.id} is inline, so it cannot have [[menu.submenus]]`);
+		}
+		for (const submenu of submenus) {
+			if (typeof submenu.id !== 'string' || typeof submenu.title !== 'string' || typeof submenu.group !== 'string' || typeof submenu.order !== 'number') {
+				fail(`every [[menu.submenus]] of ${menu.id} needs an id, a title, a group and an order`);
+			}
+		}
 		const panels = [];
 		for (const [position, item] of items.entries()) {
+			if (item.submenu !== undefined && !submenus.some(submenu => submenu.id === item.submenu)) {
+				fail(`an item of ${menu.id} names the submenu ${item.submenu}, which is not in its [[menu.submenus]]`);
+			}
 			const copy = typeof item.toml === 'string'
 				? localPanel(path.resolve(path.dirname(specFile), item.toml), { parser, index, prefix, folder, claimFolder })
 				: pollisPanel(resolveItem(index, item), { parser, source, prefix, folder, claimFolder, downloads });
@@ -414,6 +433,7 @@ async function build(source, specFile, outDir, overwrite) {
 				command: `pollis.${name}.${copy.panelId}`,
 				title: copy.title,
 				...(menuTitle && menuTitle !== copy.title ? { menuTitle } : {}),
+				...(typeof item.submenu === 'string' ? { submenu: item.submenu } : {}),
 				group: typeof item.group === 'string' ? item.group : '1_panels',
 				order: typeof item.order === 'number' ? item.order : position + 1,
 				data: `panels/${id}.toml`,
@@ -448,6 +468,7 @@ async function build(source, specFile, outDir, overwrite) {
 			title: menu.title,
 			...(menu.inline === true ? { inline: true } : {}),
 			...(typeof menu.order === 'number' ? { order: menu.order } : {}),
+			...(submenus.length ? { submenus } : {}),
 			panels,
 			...(documents.length ? { documents } : {}),
 		});
