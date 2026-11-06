@@ -7,7 +7,7 @@ A Pollis panel is one TOML file, plus its wiki pages (Markdown) and notebook tut
 - [The layout of a panel](#the-layout-of-a-panel)
 - [The files](#the-files)
 - [TOML as Pollis reads it](#toml-as-pollis-reads-it)
-- The sections: [meta](#meta), [packages](#packages), [requires](#requires), [models](#models), [bullets](#bullets), [decisionRows](#decisionrows), [miniCharts](#minicharts), [inputs](#inputs), [codeBranches](#codebranches), [placeholders and guards](#placeholders-and-guards), [actionGroups](#actiongroups), [wikis](#wikis), [notebookSections](#notebooksections), [references](#references)
+- The sections: [meta](#meta), [packages](#packages), [requires](#requires), [models](#models), [bullets](#bullets), [decisionRows](#decisionrows), [miniCharts](#minicharts), [inputs](#inputs), [codeBranches](#codebranches), [placeholders and guards](#placeholders-and-guards), [actionGroups](#actiongroups), [wikis](#wikis), [notebookSections](#notebooksections), [references](#references), [faq](#faq)
 - [Content rules](#content-rules)
 - [What a toolbox panel cannot do](#what-a-toolbox-panel-cannot-do)
 - [Model panels](#model-panels)
@@ -27,7 +27,7 @@ From top to bottom, a panel shows:
 | Example Code: the code of the current model, with the inputs filled in | `[[codeBranches]]` |
 | Next Steps: Visualise, Diagnose, Predict, Compare, Interpret | `[[actionGroups]]` |
 | Powered by: the Julia packages, with install status | `[[packages]]`, `[requires]` |
-| Learn More: wiki pages, notebook tutorials, references, videos | `[[wikis]]`, `[[notebookSections]]`, `[[references]]`, `[[packages.videos]]` |
+| Learn More: FAQ, wiki pages, notebook tutorials, references, videos | `[[faq]]`, `[[wikis]]`, `[[notebookSections]]`, `[[references]]`, `[[packages.videos]]` |
 
 The user picks a model and sets the inputs. The Example Code updates at once, and they send it to the Julia REPL, a notebook, the terminal or an editor. A Next Steps action runs after the Example Code in the same Julia session, so it can use the variables the Example Code defined (for example `model`).
 
@@ -345,6 +345,38 @@ openAccess = false
 ```
 
 `title`, `authors` and `year` (a number) are required. Give a `doi` or a `url` when there is one. Never invent a reference: give only papers you are sure exist, with their real details.
+
+A work Pollis' References already has can be cited by its key alone, `key = "Hil1975a"`: Pollis shows the work it has under that key, with any correction made in References since. The other fields may follow the key, and are shown only when References does not have it. The validator checks that the key is in Pollis' References.
+
+## faq
+
+The questions a user of the panel is most likely to ask, with their answers, shown first in Learn More:
+
+```toml
+[[faq]]
+question = "How many replicates should I use?"
+answer = """About 1,000 replicates are enough for a standard error, and about 2,000 to 10,000 for the percentile, basic and BCa intervals, which depend on the tails of the replicates.
+
+Required Replicates shows how the standard error and the interval endpoints settle as replicates are added."""
+# the wiki page the answer comes from, by its name in [[wikis]]
+wiki = "Assumptions"
+
+[[faq]]
+question = "Why is the BCa interval not symmetric around the estimate?"
+answer = "..."
+wiki = "Interpretation"
+# only the benchmark, never shown
+hidden = true
+```
+
+`question` and `answer` are required. An answer is plain text: a blank line starts a new paragraph, and `backticks` mark code. `wiki` names one of the panel's `[[wikis]]`, and Learn More links to it under the answer.
+
+Besides answering users, the FAQ is the panel's benchmark for Ask Pollis: Evaluate Answering Models asks its questions from inside the panel, the hidden ones too, and scores the answers against the panel's own, so Ask Pollis can be seen improving at questions about the panel. Ask Pollis never reads the FAQ, so the answers must come from the wiki pages, where Ask Pollis can find them. So:
+
+- Show 2 to 5 entries in Learn More: the validator warns when a panel shows fewer or more, and the panel still passes. Set `hidden = true` on the rest.
+- Ask what a user of the panel would ask, in their words: a choice between the models, a setting of the inputs, a result to read.
+- Answer from one wiki page, named by `wiki`, in 40 to 150 words, with the panel's exact labels.
+- Hidden entries can ask more precisely: a step of a derivation, a pitfall, a number from a table of the wiki.
 
 ## Content rules
 

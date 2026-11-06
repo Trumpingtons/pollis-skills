@@ -59,10 +59,10 @@
 //   order = 1                              optional, default: the position in the list
 //   submenu = "basics"                     optional, the id of a [[menu.submenus]]: group and order then apply in it
 //
-//   [[menu.documents]]                     optional: the toolbox's documentation, in Help > Documentation > Toolboxes
-//   title = "Statistics 101 Course Notes"
+//   [[menu.documents]]                     optional: the Toolbox Vignette, in Help > Documentation > Toolbox Vignettes
+//   title = "Statistics 101"
 //   description = "..."                    optional, a sentence or two
-//   source = "notes/stats101.tex"          the main .tex file, relative to the spec; its folder's .tex and .bib
+//   source = "vignette/stats101.tex"          the main .tex file, relative to the spec; its folder's .tex and .bib
 //                                          files and its resources/ folder are copied to docs/<main file's name>/,
 //                                          and Pollis compiles the document with PollisTeX when it is first opened
 //
@@ -247,10 +247,10 @@ function pollisPanel({ panel, command }, { parser, source, prefix, folder, claim
  * A copy of a panel of the user's own: a panel TOML that passes the validator, with the wiki and
  * notebook folders next to it.
  * @param {string} file
- * @param {{ parser: Parser; index: PanelIndex; prefix: string; folder: string; claimFolder: ClaimFolder }} context
+ * @param {{ parser: Parser; index: PanelIndex; referenceKeys: Set<string>; prefix: string; folder: string; claimFolder: ClaimFolder }} context
  * @returns {PanelCopy}
  */
-function localPanel(file, { parser, index, prefix, folder, claimFolder }) {
+function localPanel(file, { parser, index, referenceKeys, prefix, folder, claimFolder }) {
 	if (!fs.existsSync(file)) {
 		fail(`the panel ${file} does not exist`);
 	}
@@ -260,7 +260,7 @@ function localPanel(file, { parser, index, prefix, folder, claimFolder }) {
 	}
 	const text = fs.readFileSync(file, 'utf-8');
 	const roots = materialRoots(file);
-	const report = validate(file, text, parser, { ...roots, builtIn: builtInFiles(index) });
+	const report = validate(file, text, parser, { ...roots, builtIn: builtInFiles(index), referenceKeys });
 	if (report.errors.length) {
 		const errors = sortedProblems(report).filter(problem => problem.kind === 'error').map(problem => `  ${file}:${problem.line}: ${problem.message}`);
 		fail([`the panel ${file} has errors:`, ...errors, 'Fix them, and check it again with validatePanel.mjs.'].join('\n'));
@@ -345,7 +345,7 @@ function writeFile(file, /** @type {string | Buffer} */ data) {
  * @param {Source} source @param {string} specFile @param {string} outDir @param {boolean} overwrite
  */
 async function build(source, specFile, outDir, overwrite) {
-	const [index, parser] = await Promise.all([source.index(), source.parser()]);
+	const [index, parser, referenceKeys] = await Promise.all([source.index(), source.parser(), source.referenceKeys()]);
 	const spec = parseSpec(parser, fs.readFileSync(specFile, 'utf-8'));
 	const extension = /** @type {TomlTable | undefined} */ (spec.extension);
 	const menus = /** @type {TomlTable[]} */ (Array.isArray(spec.menu) ? spec.menu : []);
@@ -419,7 +419,7 @@ async function build(source, specFile, outDir, overwrite) {
 				fail(`an item of ${menu.id} names the submenu ${item.submenu}, which is not in its [[menu.submenus]]`);
 			}
 			const copy = typeof item.toml === 'string'
-				? localPanel(path.resolve(path.dirname(specFile), item.toml), { parser, index, prefix, folder, claimFolder })
+				? localPanel(path.resolve(path.dirname(specFile), item.toml), { parser, index, referenceKeys, prefix, folder, claimFolder })
 				: pollisPanel(resolveItem(index, item), { parser, source, prefix, folder, claimFolder, downloads });
 			const id = `${prefix}.${copy.panelId}`;
 			if (seen.has(id)) {
@@ -537,9 +537,9 @@ async function build(source, specFile, outDir, overwrite) {
 		...readmeRows.map(row => `| ${row.title} | TODO | ${row.packages.map(packageLink).join(', ')} |`),
 		'',
 		...(documentCopies.length ? [
-			'## Documentation',
+			'## Toolbox Vignette',
 			'',
-			'In **Help > Documentation > Toolboxes**, compiled from its LaTeX sources the first time it is opened:',
+			'In **Help > Documentation > Toolbox Vignettes**, compiled from its LaTeX sources the first time it is opened:',
 			'',
 			...documentCopies.map(document => `- **${document.title}**${document.description ? `: ${document.description}` : ''}`),
 			'',

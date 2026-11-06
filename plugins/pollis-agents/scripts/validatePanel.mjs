@@ -17,9 +17,11 @@
 //   errors    a table or field Pollis does not know, a missing required field, a wrong type, a model
 //             id, input id or {{placeholder}} that names nothing, a `when` condition that can never
 //             hold, a duplicate id, a wiki or notebook file that does not exist, a section that only
-//             a panel with its own code can use
+//             a panel with its own code can use, an FAQ entry naming a wiki page the panel does not have,
+//             a reference `key` that Pollis' References does not have
 //   warnings  the content rules: literal Greek letters, DataFrames, Zygote, spaces inside
-//             parentheses in labels, a panel without wikis, notebooks or Next Steps
+//             parentheses in labels, a panel without wikis, notebooks or Next Steps, an FAQ that does
+//             not show 2 to 5 entries in Learn More
 // The wiki and notebook files named by `file` are looked for in <dir>/wiki/ and <dir>/notebooks/
 // next to the TOML, or in ../wiki/ and ../notebooks/ (a toolbox's panels/ folder), unless --wiki and
 // --notebooks give the folders. Exit status: 0 when there are no errors, 1 otherwise.
@@ -165,10 +167,14 @@ const WIKI = { name: string(true), description: string(), file: string(), url: s
 const SEPARATOR = { separator: boolean(true), label: string() };
 /** @type {Shape} */
 const REFERENCE = { title: string(true), authors: string(true), year: { type: 'number', required: true }, journal: string(), doi: string(), url: string(), openAccess: boolean() };
+/** A work of Pollis' References, by its key: Pollis shows the work it has under that key, else the fields written here. @type {Shape} */
+const REFERENCE_BY_KEY = { key: string(true), title: string(), authors: string(), year: { type: 'number' }, journal: string(), doi: string(), url: string(), openAccess: boolean() };
 /** @type {Shape} */
 const OPTION = { value: string(true), label: string(true), models: strings, when: string() };
 /** @type {Shape} */
 const INPUT = { id: string(true), label: string(true), tooltip: string(), kind: string(), default: { type: 'scalar' }, options: array(OPTION), models: strings, when: string(), newRow: boolean() };
+/** @type {Shape} */
+const FAQ = { question: string(true), answer: string(true), wiki: string(), hidden: boolean() };
 /** @type {Shape} */
 const ACTION = { id: string(true), label: string(true), desc: string(true), code: string(true), models: strings, when: string() };
 
@@ -183,6 +189,7 @@ const PANEL = {
 	codeBranches: array({ model: string(true), code: string(true) }, true),
 	actionGroups: array({ id: string(true), label: string(true), actions: array(ACTION, true) }),
 	inputs: array(INPUT),
+	faq: array(FAQ),
 };
 /** @type {Shape} */
 const META = { title: string(true), viewType: string(), defaultModel: string(true), decisionFirstColumn: string() };
@@ -304,7 +311,8 @@ function placeholders(code) {
  * Check a panel TOML.
  * @param {string} file @param {string} text the TOML
  * @param {Parser} parser
- * @param {{ wiki: string[]; notebooks: string[]; builtIn: Set<string> }} roots where the wiki and notebook files are looked for, and Pollis' own
+ * @param {{ wiki: string[]; notebooks: string[]; builtIn: Set<string>; referenceKeys: Set<string> }} roots where the wiki and notebook files are looked for, Pollis' own,
+ * and the keys of Pollis' References
  */
 export function validate(file, text, parser, roots) {
 	const { lines, misread } = lineIndex(text);
@@ -352,7 +360,12 @@ export function validate(file, text, parser, roots) {
 		}
 	}
 	tables(data.wikis).forEach((wiki, index) => checkShape(report, ['wikis', index], wiki, wiki.separator ? SEPARATOR : WIKI));
-	tables(data.references).forEach((reference, index) => checkShape(report, ['references', index], reference, reference.separator ? SEPARATOR : REFERENCE));
+	tables(data.references).forEach((reference, index) => {
+		checkShape(report, ['references', index], reference, reference.separator ? SEPARATOR : 'key' in reference ? REFERENCE_BY_KEY : REFERENCE);
+		if (!reference.separator && typeof reference.key === 'string' && !roots.referenceKeys.has(reference.key)) {
+			report.error(['references', index, 'key'], `Pollis' References has no work with the key ${reference.key}: cite a work it has, or write the reference out (title, authors, year...)`);
+		}
+	});
 	if (data.wikis !== undefined && !Array.isArray(data.wikis)) {
 		report.error(['wikis'], 'must be an array of tables ([[wikis]])');
 	}
@@ -571,6 +584,22 @@ export function validate(file, text, parser, roots) {
 	if (!groups.length) {
 		report.warn(['actionGroups'], 'the panel has no Next Steps');
 	}
+
+	// The FAQ: the wiki page each answer comes from, and how many entries Learn More shows
+	const wikiNames = new Set(tables(data.wikis).filter(wiki => !wiki.separator).map(wiki => String(wiki.name)));
+	const faq = tables(data.faq);
+	faq.forEach((entry, index) => {
+		if (typeof entry.wiki === 'string' && !wikiNames.has(entry.wiki)) {
+			report.error(['faq', index, 'wiki'], `"${entry.wiki}" is not the name of one of the panel's wiki pages (${[...wikiNames].join(', ') || 'none'})`);
+		}
+	});
+	const shown = faq.filter(entry => entry.hidden !== true).length;
+	const benchmark = 'Besides answering users in Learn More, the FAQ is the panel\'s benchmark for Ask Pollis: Evaluate Answering Models asks its questions from inside the panel and scores the answers, so Ask Pollis can be seen improving at questions about this panel. Entries with hidden = true are only the benchmark and are never shown';
+	if (shown < 2) {
+		report.warn(['faq'], `${shown ? 'the panel has one FAQ entry' : 'the panel has no FAQ'}: add 2 to 5 questions a user is likely to ask, as [[faq]] with question, answer and the wiki page the answer comes from. ${benchmark}`);
+	} else if (shown > 5) {
+		report.warn(['faq'], `the panel shows ${shown} FAQ entries in Learn More, and 2 to 5 are suggested: set hidden = true on the rest. ${benchmark}, so the hidden entries still count without crowding Learn More`);
+	}
 	return report;
 }
 
@@ -639,6 +668,7 @@ async function main() {
 	}
 	const parser = await source.parser();
 	const builtIn = builtInFiles(await source.index());
+	const referenceKeys = await source.referenceKeys();
 	let errors = 0;
 	let warnings = 0;
 	for (const file of files) {
@@ -650,6 +680,7 @@ async function main() {
 			wiki: wiki ? [path.resolve(wiki)] : roots.wiki,
 			notebooks: notebooks ? [path.resolve(notebooks)] : roots.notebooks,
 			builtIn,
+			referenceKeys,
 		});
 		const problems = sortedProblems(report);
 		for (const problem of problems) {

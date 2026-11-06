@@ -11,6 +11,9 @@
 //   build/pollis/pollisToml.mjs     Pollis' panel TOML parser as plain JavaScript, written by
 //                                   build/pollis/makePollisToml.ts, so a panel is read exactly as
 //                                   Pollis reads it
+//   src/vs/workbench/contrib/model/browser/media/references/references.json
+//                                   the works of Pollis' References, by key, which a panel may cite
+//                                   with `key = "..."`
 
 import * as fs from 'node:fs';
 import * as os from 'node:os';
@@ -23,6 +26,7 @@ const TOOLBOXES_SOURCE = 'https://raw.githubusercontent.com/Trumpingtons/pollis-
 const TOOLBOXES_PREFIX = 'toolboxes/';
 const INDEX_PATH = 'build/pollis/panel-index.json';
 const PARSER_PATH = 'build/pollis/pollisToml.mjs';
+const REFERENCES_PATH = 'src/vs/workbench/contrib/model/browser/media/references/references.json';
 
 /**
  * @typedef {{ [key: string]: unknown }} Table
@@ -86,6 +90,15 @@ export class Source {
 			fail(`${INDEX_PATH} has a format this script does not know: update the Pollis Agents plugin`);
 		}
 		return index;
+	}
+
+	/** The keys of the works of Pollis' References. @returns {Promise<Set<string>>} */
+	async referenceKeys() {
+		const library = JSON.parse((await this.read(REFERENCES_PATH)).toString('utf-8'));
+		if (!Array.isArray(library.references)) {
+			fail(`${REFERENCES_PATH} has a format this script does not know: update the Pollis Agents plugin`);
+		}
+		return new Set(library.references.map((/** @type {{ key: string }} */ work) => work.key));
 	}
 
 	/** Pollis' panel TOML parser. @returns {Promise<Parser>} */
