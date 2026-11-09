@@ -13,6 +13,7 @@ NAME/
   targets/*.csv     the published tables the code must reproduce, typed in as printed
   inputs/*.csv      input tables typed in from the article (the other inputs are links)
   INSTRUCTIONS.md   the user's notes for the agent: what the method does, where in the article, what to watch for
+  PROGRESS.md       the coding agent's record of its work: what the article settles, where each target stands, the next step
   VIGNETTE.md       the user's notes for the vignette: its look, its sections, the LaTeX style, the vignettes to follow
   vignette/NAME.tex the vignette (the write-vignette skill), its PDF beside it
 ```
@@ -50,12 +51,21 @@ local = "..."                      # set by Pollis when the user saved a copy: n
 source = "Table 1, page 12"
 call = "fixed_effects(grunfeld)"   # the Julia expression that computes it
 tolerance = 0                      # how many units of the last printed digit the result may be off by
+untested = [["mu", "Standard error"]]   # optional: cells shown in the vignette but not tested, as [row label, column]
+
+[[articles]]                       # optional, after every other top-level key: another article whose tables are targets too
+key = "Key2014a"
+citation = "Author, C. (2014). Title. Journal, 82(2), 765-784."
+doi = ""
+article = "https://..."
 ```
 
 - **Inputs are links.** The tests download each input into memory, as a Tables.jl column table (`Tables.columntable` of a `CSV.File`), and bind it to a variable named after its table. Nothing is saved to disk. Never use DataFrames.
 - **A target** is a CSV file: its first column holds the row labels, its other cells the published values exactly as printed (`0.0631`, `-12.4`), a cell left empty where the table has no value. Its header row names the columns.
 - **A call** must return a matrix laid out like the target, without the label column: the same rows and columns, in the same order. A Tables.jl table is turned into a matrix with `Tables.matrix`; a vector is one column.
 - **A value passes** when the result, rounded to the number of decimals printed, equals the printed value within `tolerance` units of its last digit. A printed `0.0631` has 4 decimals: the result `0.06312` passes, `0.06318` fails with tolerance 0 and passes with tolerance 1.
+- **Tolerance** is 0 for values the article computed exactly and 3 for simulated ones (bootstrap or Monte Carlo p-values and critical values), unless the user decides otherwise. A value that stays off for a reason found and explained (a numerical derivative of the authors' software, random draws that cannot be reproduced) keeps its printed value in the target and goes in `untested`, with the reason, for the vignette; never blank the cell, and never raise the tolerance for it.
+- **Several articles**: when one package reproduces more than one article, the first is the method's own (`key`, `citation`, `doi`, `article`), the others are `[[articles]]` tables, and each target's name and `source` start with its article.
 - `article_local`, and `local` in an input, are paths to copies the user chose to keep. Pollis writes them; leave them as they are.
 
 ## src/NAME.jl

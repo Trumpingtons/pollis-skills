@@ -18,8 +18,22 @@ The first message from Pollis names the method folder and gives the test command
 
 It needs Julia (`julia --version`) and the internet, to read the article and download the data. If Julia is missing, tell the user to install it with juliaup and stop.
 
+## Save your work as you go
+
+Writing a method can take hours and a session can stop at any point, so keep `PROGRESS.md` in the method folder, the record a new session starts from:
+
+- **What the article settles**: for each target, its table, the model, the estimator and the options found in step 2, and each open point with how it was settled (by the article, INSTRUCTIONS.md or the user).
+- **Where each target stands**: not started, written, passing, or off (which values, by how many units of the last digit).
+- **What was tried** for values that stay off, and what it changed.
+- **The next step.**
+
+Write it at the end of step 2, and update it after each test run and before you stop. Save the code in `src/NAME.jl` and the calls in method.toml as soon as each target's function works, not at the end.
+
+To save time and tokens, check a target you are working on by calling its function in one Julia session (`include` the code, then the call), not with the test command, which reruns every target: run the test command when a target looks done, and leave the slow targets (long grids, bootstraps, simulations) for last.
+
 ## Steps
 
+0. **If `PROGRESS.md` exists**, read it first and go on from its next step: do not redo the reading of steps 1 and 2 for the targets it already covers, and read the article again only for what it leaves open.
 1. **Read the method**: `method.toml`, `INSTRUCTIONS.md` (the user's notes: follow them, they win over your own reading of the article), every `targets/*.csv` and its `[targets.NAME]` table. Read the article from its link (`article`, else `https://doi.org/` and the `doi`), and the input data from its links. **Do not save copies** of the article or the data, not even in a temporary folder: read them into memory (for example `Downloads.download(url, IOBuffer())` in Julia) or read the web page. If the article cannot be read (behind a paywall, say), tell the user and ask for the sections you need; never guess the method from its title.
 2. **Find each target in the article**: the table or the passage it comes from (its `source`), what each row and column is, the model, the estimator, the options (degrees-of-freedom corrections, which variance estimator, logs or levels, the sample used). Note anything the article leaves open. Say in a few lines what you found before you write code, and ask about anything you cannot settle from the article and INSTRUCTIONS.md.
 3. **Write `src/NAME.jl`** (module NAME): one exported function for each thing the method computes, taking the inputs as Tables.jl column tables and returning a matrix laid out like the target (its rows and columns in the target's order, without the label column). Replace the stub Pollis wrote. Use well-known registered packages and list them in `packages` in method.toml; Tables.jl for tables, never DataFrames; Enzyme rather than Zygote when the method needs reverse-mode derivatives. Give every exported function a docstring that says what it computes, what it takes and what it returns, and which table of the article it reproduces.
@@ -31,6 +45,6 @@ It needs Julia (`julia --version`) and the internet, to read the article and dow
 
 ## Rules
 
-- Edit only the method folder: `method.toml`, `src/`, and `targets/` only to fix a value the user confirmed was mistyped. Never edit the package the test command makes (it is rewritten each run), and never add `article_local` or `local`.
+- Edit only the method folder: `method.toml`, `src/`, `PROGRESS.md`, and `targets/` only to fix a value the user confirmed was mistyped. Never edit the package the test command makes (it is rewritten each run), and never add `article_local` or `local`.
 - Never type in a result: every value the tests check is computed by the code from the data.
 - Never use DataFrames. Never name a university in what you write.
