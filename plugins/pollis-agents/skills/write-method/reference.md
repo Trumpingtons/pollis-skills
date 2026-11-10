@@ -14,7 +14,7 @@ NAME/
   inputs/*.csv      input tables typed in from the article (the other inputs are links)
   INSTRUCTIONS.md   the user's notes for the agent: what the method does, where in the article, what to watch for
   PROGRESS.md       the coding agent's record of its work: what the article settles, where each target stands, the next step
-  tests/tests.jl    the reference and property tests, which the package's tests include ([tests] in method.toml)
+  tests/tests.jl    the reference, property and convergence tests, which the package's tests include ([tests] in method.toml)
   tests/references/ the saved results the reference tests compare with, one file to a result
   VIGNETTE.md       the user's notes for the vignette: its look, its sections, the LaTeX style, the vignettes to follow
   vignette/NAME.tex the vignette (the write-vignette skill), its PDF beside it
@@ -55,7 +55,7 @@ call = "fixed_effects(grunfeld)"   # the Julia expression that computes it
 tolerance = 0                      # how many units of the last printed digit the result may be off by
 untested = [["mu", "Standard error"]]   # optional: cells shown in the vignette but not tested, as [row label, column]
 
-[tests]                            # the reference and property tests (see Reference and property tests below)
+[tests]                            # the reference, property and convergence tests (see Reference and property tests below)
 file = "tests/tests.jl"
 copy = ["tests/references"]
 packages = ["ReferenceTests", "Supposition", "StableRNGs", "Random"]   # and every package tests.jl loads beyond Test, CSV, Downloads and Tables
@@ -114,10 +114,11 @@ The test output has one testset per target, named by its `source`, and one test 
 
 ## Reference and property tests
 
-The targets check what the article printed, to the digits printed. Two more kinds of test, in `tests/tests.jl`, guard the rest once the targets pass:
+The targets check what the article printed, to the digits printed. More tests, in `tests/tests.jl`, guard the rest once the targets pass:
 
 - **Reference tests** (ReferenceTests.jl) save the method's results in full, once they are right, in `tests/references/`, and fail when a later run gives other results: a change to the code, or a new version of a package the method uses, that moves a digit the article did not print, a standard error it did not report or a value the targets do not check.
 - **Property tests** (Supposition.jl) try a rule the method's results must obey on inputs it generates, such as estimates that do not depend on the order of the rows, and print the smallest input that breaks it.
+- **Convergence tests**, only for a method that steps a differential equation with a scheme of its own, check that the scheme's error falls at its order as the step is halved.
 
 The package's `test/runtests.jl` includes `tests/tests.jl` inside its testset, after it has defined `input(source)`, which loads an input from its link or file as the targets do, and `using NAME`. A path given to `@test_reference` is relative to `tests/tests.jl`, so `"references/model32.txt"` is `tests/references/model32.txt`.
 
@@ -161,6 +162,44 @@ end
 - a result stays within its bounds: a probability between 0 and 1, a variance or a standard error not negative, a lower confidence bound below the upper.
 
 Generate what the property varies (a seed for a permutation, a scale, a temperature), not whole data sets: the method's own inputs are the data. Every `@check` takes `db=false`, so that it writes no database of counterexamples into the package, and `rng=Xoshiro(1)`; keep `max_examples` small (10 to 50), as each example runs the method. A property that fails is a finding: report it, and never weaken the property to make it pass.
+
+**Convergence tests**, only for a method whose `src/` steps a differential equation forward in time with a scheme of its own: a loop over the time steps of a diffusion (an Euler-Maruyama or Milstein simulation), a discretised model in continuous time, an ODE solver written by hand. A method that calls the solvers of DifferentialEquations.jl, or has no differential equation, gets none: its solvers are tested in their own packages. A convergence test runs the scheme at step sizes each half the one before, on a problem whose exact solution is known, and checks that the error falls at the scheme's order: the slope of log(error) against log(step).
+
+```julia
+using Statistics   # cov and var; add "Statistics" to packages in [tests]
+
+@testset "Convergence tests" begin
+	# The strong order of the method's Milstein step, 1 (the article's section 3), on geometric Brownian motion,
+	# dX = mu X dt + sigma X dW, whose exact solution on each path is exp((mu - sigma^2 / 2) t + sigma W(t))
+	mu, sigma = 2.0, 1.0
+	step(x, dt, dW) = NAME.milstein_step(x, dt, dW; drift = x -> mu * x, diffusion = x -> sigma * x)   # the method's own step
+	dts = 2.0 .^ (-4:-1:-9)
+	finest, n, paths = minimum(dts), 2^9, 1000
+	rng = StableRNG(1)
+	errors = zeros(length(dts))
+	for _ in 1:paths
+		dW = sqrt(finest) .* randn(rng, n)   # one path, at the smallest step
+		exact_end = exp((mu - sigma^2 / 2) + sigma * sum(dW))
+		for (j, dt) in enumerate(dts)
+			r = round(Int, dt / finest)   # each increment of a larger step is the sum of the r small ones it covers
+			x = 1.0
+			for k in 1:div(n, r)
+				x = step(x, dt, sum(view(dW, ((k - 1) * r + 1):(k * r))))
+			end
+			errors[j] += abs(x - exact_end) / paths
+		end
+	end
+	@test abs(cov(log.(dts), log.(errors)) / var(log.(dts)) - 1.0) <= 0.2
+end
+```
+
+- **The order** is the one the article gives for its scheme or, when it gives none, the scheme's own: Euler 1 for an ODE; Euler-Maruyama strong 1/2 and weak 1, Milstein strong 1. Say in a comment where it comes from.
+- **The problem**: one with an exact solution, run through the method's own step: geometric Brownian motion or a linear ODE when the step takes its drift and diffusion as arguments, or the method's own model at parameters for which it has an exact solution. When neither works, write no convergence test and say why in the report.
+- **An ODE scheme** needs no paths: solve at each step and take the distance from the exact solution at the end, as the inner loop of the template does for one path.
+- **The same paths at every step**: draw the Brownian increments once, at the smallest step, with a `StableRNG`, and sum them for each larger step, as in the template. Paths drawn afresh for each step put the difference between paths into the error.
+- **Steps and paths**: from 2^-4 to 2^-9, and 1000 paths for a strong order. Test the strong order unless the article states only a weak one: a weak error is smaller, and needs about 10 000 paths and the means of the scheme and of the exact solution compared on the same paths.
+- **The gap**: 0.2. Before writing it, run the test at seeds 1 to 5 and check that every estimate lies within it; if not, add paths, never widen the gap to make it pass. An order that falls short is a finding: report it.
+- Keep the test to a few seconds.
 
 **Saving the references.** ReferenceTests saves a reference that does not exist yet, and passes, rather than failing; the test command saves it in the package it makes, which it rewrites on the next run. So:
 
