@@ -1,6 +1,8 @@
 ---
 name: write-vignette
 description: "Write the vignette of a Pollis method: a two-page LaTeX document, in the method folder, that says what the method does, which article it comes from, and how close its tests come to the published values, side by side. Triggers include 'write a vignette', 'document this method', 'write the vignette of this method', 'Write a Vignette'. Run it once the write-method skill has the targets passing."
+metadata:
+  updated: "2026-11-10"
 ---
 
 # Write a Vignette

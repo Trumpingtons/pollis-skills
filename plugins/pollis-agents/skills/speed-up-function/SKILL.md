@@ -1,6 +1,8 @@
 ---
 name: speed-up-function
 description: "Speed up a Julia function with the user: find it, diagnose where its time goes (type stability, allocations, a profile), explain the plan, each change with what in the diagnosis calls for it, and once the user agrees, write a faster version in a new file beside it, with the reason for each change in a comment, checked to give the same result and timed against the original. Never changes the original. Triggers include 'speed up this function', 'make this Julia code faster', 'why is this function slow', 'Speed Up with Agent'."
+metadata:
+  updated: "2026-11-10"
 ---
 
 # Speed Up a Function

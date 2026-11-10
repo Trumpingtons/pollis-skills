@@ -1,6 +1,8 @@
 ---
 name: tables-from-article
 description: "Type in tables of the article of a Pollis method or replication, as printed: target tables (the published results to reproduce) or input data, each a CSV in its folder with its entry in method.toml or replication.toml, then list every value that could not be read for certain. Triggers include 'type in the tables of the article', 'tables from the article', 'add these tables as targets', 'add these tables as input data', 'Add from Article'."
+metadata:
+  updated: "2026-11-10"
 ---
 
 # Tables from the Article

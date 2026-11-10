@@ -1,6 +1,8 @@
 ---
 name: plan-replication
 description: "Plan a Pollis replication: read the article of a replication made on its page in Pollis (Compose > Replication > Replicate an Article) and propose, for each target table, how it is computed: by registered Julia packages, by code of the notebook's own, or by a new method, written in the replication's plan for the user to check. Reads and proposes; writes no code. Triggers include 'plan this replication', 'which packages compute these tables', 'Plan with Agent'."
+metadata:
+  updated: "2026-11-10"
 ---
 
 # Plan a Replication

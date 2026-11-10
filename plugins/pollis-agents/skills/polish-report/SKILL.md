@@ -1,6 +1,8 @@
 ---
 name: polish-report
 description: "Polish a LaTeX report or slides that Pollis wrote from a notebook: a title and abstract, sections that follow the notebook, booktabs tables and captioned figures built only from the outputs Pollis saved, published values beside Julia's, citations from the article's BibTeX or pollis.bib, compiled with PollisTeX. Triggers include 'polish this report', 'polish the slides', 'make this report read well', 'Polish with Agent'."
+metadata:
+  updated: "2026-10-28"
 ---
 
 # Polish a LaTeX Report or Slides Written by Pollis

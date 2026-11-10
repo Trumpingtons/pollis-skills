@@ -1,6 +1,8 @@
 ---
 name: explain-differences
 description: "Explain the differences of a Pollis replication: for each published value that Julia does not reproduce in results.csv, look into why and propose its kind (misprint, rounding, not replicable, unexplained) and an explanation, written in the replication's record for the user to check. Changes no code. Triggers include 'explain the differences', 'why does Julia not reproduce these values', 'Explain with Agent'."
+metadata:
+  updated: "2026-11-10"
 ---
 
 # Explain the Differences

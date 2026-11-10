@@ -1,6 +1,8 @@
 ---
 name: journal-metrics
 description: "Add journal metrics to the user's PollisJournals database: SJR (SCImago), SNIP (CWTS), CiteScore (Scopus), the Journal Impact Factor (Journal Citation Reports) and the ABDC Journal Quality List's ratings. The user downloads each file for their own use, Pollis imports it on their computer (the Journal Metrics page, or Databases view > PollisJournals > Import Journal Metrics...), and the agent then answers questions about journals with SQL. Triggers include 'add impact factors to Pollis', 'import SJR', 'get the CiteScore of my journals', 'which quartile is this journal in', 'is this journal A* on the ABDC list', 'compare these journals', 'is this a good journal', 'update my journal metrics'."
+metadata:
+  updated: "2026-10-21"
 ---
 
 # Journal Metrics

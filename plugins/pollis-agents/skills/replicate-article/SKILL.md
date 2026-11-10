@@ -1,6 +1,8 @@
 ---
 name: replicate-article
 description: "Replicate an article in a Pollis replication: write the replication's Julia notebook, in a folder made on its page in Pollis (Compose > Replication > Replicate an Article), so that it reproduces the article's published tables (the targets) from its data, each printed value beside Julia's in results.csv, through Pollis.replicate and Pollis.compare. Triggers include 'replicate this article', 'write the replication notebook', 'reproduce the published tables', 'Replicate with Agent'."
+metadata:
+  updated: "2026-11-10"
 ---
 
 # Replicate an Article

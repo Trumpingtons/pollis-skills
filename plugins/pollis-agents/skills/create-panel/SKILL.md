@@ -1,6 +1,8 @@
 ---
 name: create-panel
 description: "Create a new Pollis panel on a topic the user chooses: write its panel TOML (models, key points, decision table, inputs, example code, Next Steps, references), its wiki pages and notebook tutorials, check it with the validator, and package it as a toolbox. Triggers include 'create a panel', 'make a new panel on', 'write a Pollis panel for', 'Panel Agent', 'add a panel about', 'I want a panel for my course on', 'create the panels of this request', 'run my panel request'."
+metadata:
+  updated: "2026-11-06"
 ---
 
 # Create a Panel

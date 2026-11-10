@@ -1,6 +1,8 @@
 ---
 name: write-method
 description: "Write a Pollis method: the Julia code of a published statistical method, in a method folder made on its page in Pollis (Compose > Replication > Create Article Method), so that it reproduces the article's tables (the targets) to the digits printed, tested with Pollis' package script. Triggers include 'write a method', 'write the code of this method', 'reproduce the tables of this article', 'implement the method in this folder', 'make the targets pass', 'Write a Method'. The prepare-method skill then brings it up to the Pollis registry rules."
+metadata:
+  updated: "2026-11-10"
 ---
 
 # Write a Method

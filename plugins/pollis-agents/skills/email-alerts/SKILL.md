@@ -1,6 +1,8 @@
 ---
 name: email-alerts
 description: "Set up email alerts at Google Scholar, JSTOR, HeinOnline, Nexis Uni, SSRN, Semantic Scholar, Web of Science, Scopus, Westlaw and Factiva, sent to the user's own alerts mailbox, which Pollis reads and turns into one RSS feed per alert (Explore > RSS > Add Feed > Email Alerts...). Writes precise searches in each source's syntax, so the alerts bring few false hits. Triggers include 'set up a Google Scholar alert', 'get alerts from JSTOR in Pollis', 'turn my search into a feed', 'my alerts bring too much noise', 'set up my alerts mailbox', 'follow new papers on a topic by email'."
+metadata:
+  updated: "2026-10-21"
 ---
 
 # Email Alerts

@@ -1,6 +1,8 @@
 ---
 name: package-toolbox
 description: "Package a toolbox: build a Pollis toolbox (a .vsix extension) from Pollis menu entries the user picks, in the menus and order they want, for example one toolbox per course for a teacher's students. Triggers include 'make a toolbox from these panels', 'package these menu entries as an extension', 'build a toolbox for my course', 'Extension Agent', 'build an extension from this spec', 'package my new panel'. The create-panel skill hands its new panels over to this one."
+metadata:
+  updated: "2026-11-06"
 ---
 
 # Package a Toolbox

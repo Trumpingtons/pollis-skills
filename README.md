@@ -21,6 +21,13 @@ A change to the index format there needs the matching change to the scripts here
 
 The plugins need only Node.js 22 or later on the user's computer: no npm packages.
 
+Each `SKILL.md` gives the date it last changed in its front matter, `metadata.updated`, which Pollis shows in the Updated column of **Compose > Agent Skills**: change it, as `"YYYY-MM-DD"`, in every commit that changes a file of the skill.
+
+```yaml
+metadata:
+  updated: "2026-11-10"
+```
+
 ## License
 
 AGPL-3.0, see [LICENSE.txt](LICENSE.txt).

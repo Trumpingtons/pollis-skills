@@ -1,6 +1,8 @@
 ---
 name: prepare-method
 description: "Prepare a Pollis method for registration: bring a method whose code is written (with the write-method skill or by hand) up to the Pollis registry rules (a name of at least 5 characters, a usage example, a docstring for every exported name) without changing what it computes, checked with Pollis' package script. Triggers include 'prepare for registration', 'prepare this method for the registry', 'make this method meet the registry rules', 'fix the registry rules', 'add docstrings and a usage example to this method', 'Prepare for Registration'."
+metadata:
+  updated: "2026-11-10"
 ---
 
 # Prepare a Method for Registration

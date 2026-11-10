@@ -1,6 +1,8 @@
 ---
 name: references
 description: "Cite and list references in Pollis documents: wikis and notebooks (Markdown) and LaTeX documents (reports, write-ups, the Tour). Every citation is Author (year) with all authors written out, linked to its entry in the References, and every entry comes from the Pollis library, pollis.bib, with its DOI link. Triggers include 'add references', 'cite this paper', 'fix the citations', 'write the References section', 'link the citations', 'add a DOI', 'check the references of this wiki/notebook/document'."
+metadata:
+  updated: "2026-11-10"
 ---
 
 # References
