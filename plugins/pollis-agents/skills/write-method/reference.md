@@ -14,6 +14,8 @@ NAME/
   inputs/*.csv      input tables typed in from the article (the other inputs are links)
   INSTRUCTIONS.md   the user's notes for the agent: what the method does, where in the article, what to watch for
   PROGRESS.md       the coding agent's record of its work: what the article settles, where each target stands, the next step
+  tests/tests.jl    the reference and property tests, which the package's tests include ([tests] in method.toml)
+  tests/references/ the saved results the reference tests compare with, one file to a result
   VIGNETTE.md       the user's notes for the vignette: its look, its sections, the LaTeX style, the vignettes to follow
   vignette/NAME.tex the vignette (the write-vignette skill), its PDF beside it
 ```
@@ -52,6 +54,11 @@ source = "Table 1, page 12"
 call = "fixed_effects(grunfeld)"   # the Julia expression that computes it
 tolerance = 0                      # how many units of the last printed digit the result may be off by
 untested = [["mu", "Standard error"]]   # optional: cells shown in the vignette but not tested, as [row label, column]
+
+[tests]                            # the reference and property tests (see Reference and property tests below)
+file = "tests/tests.jl"
+copy = ["tests/references"]
+packages = ["ReferenceTests", "Supposition", "StableRNGs", "Random"]   # and every package tests.jl loads beyond Test, CSV, Downloads and Tables
 
 [[articles]]                       # optional, after every other top-level key: another article whose tables are targets too
 key = "Key2014a"
@@ -104,6 +111,66 @@ julia "<Pollis>/.../media/methods/package.jl" "<packages folder>" "<method folde
 Pollis gives the exact command, with its paths, in the first message when it starts the agent. Without `--push`, it pushes nothing and registers nothing: it makes the package `NAME.jl` in the packages folder (the code copied from `src/`, the targets as test data, `test/runtests.jl` written from method.toml), runs its tests, and reports the registry rules the method still breaks. It overwrites `src/` and the test data of that package each time, so always edit the method folder, never the package.
 
 The test output has one testset per target, named by its `source`, and one test per printed value, named by its row and column label, so a failure says which value is off.
+
+## Reference and property tests
+
+The targets check what the article printed, to the digits printed. Two more kinds of test, in `tests/tests.jl`, guard the rest once the targets pass:
+
+- **Reference tests** (ReferenceTests.jl) save the method's results in full, once they are right, in `tests/references/`, and fail when a later run gives other results: a change to the code, or a new version of a package the method uses, that moves a digit the article did not print, a standard error it did not report or a value the targets do not check.
+- **Property tests** (Supposition.jl) try a rule the method's results must obey on inputs it generates, such as estimates that do not depend on the order of the rows, and print the smallest input that breaks it.
+
+The package's `test/runtests.jl` includes `tests/tests.jl` inside its testset, after it has defined `input(source)`, which loads an input from its link or file as the targets do, and `using NAME`. A path given to `@test_reference` is relative to `tests/tests.jl`, so `"references/model32.txt"` is `tests/references/model32.txt`.
+
+```julia
+# The reference and property tests of Grunfeld, which the package's test/runtests.jl includes ([tests] in method.toml)
+using ReferenceTests, Supposition, StableRNGs, Random
+
+"A result in full, one number to a line."
+in_full(result) = join(string.(vec(result)), "\n")
+"Two results in full, the same within a relative tolerance."
+within(rtol) = (reference, actual) -> isapprox(parse.(Float64, split(reference)), parse.(Float64, split(actual)); rtol)
+
+grunfeld = input("https://raw.githubusercontent.com/...")   # the input's url or file, as in [inputs.grunfeld]
+
+@testset "Reference tests" begin
+	# The fixed effects estimates in full, which the target table1 checks to the digits printed
+	@test_reference "references/fixed_effects.txt" in_full(fixed_effects(grunfeld)) by=within(1e-8)
+end
+
+@testset "Property tests" begin
+	n = length(grunfeld.firm)
+	original = fixed_effects(grunfeld)
+	# The within estimator does not depend on the order of the observations
+	@check db=false rng=Xoshiro(1) max_examples=20 function row_order(seed = Data.Integers(1, 10_000))
+		order = randperm(StableRNG(seed), n)
+		isapprox(fixed_effects(map(column -> column[order], grunfeld)), original; rtol = 1e-8)
+	end
+end
+```
+
+**What to save.** The result of each target's call, in full, and the method's other results that a user gets but the targets do not check (every case-deletion statistic, not only the four the article printed; the whole curve, not only its printed points). Numbers in full, one to a line, with `in_full`: a text file a reader can compare line by line.
+
+**The tolerance** of `within`: wider than the differences in the last digits that another processor or another version of a linear algebra library gives, and much narrower than the last digit the article printed. `1e-8` for a result computed in closed form or by a converged iteration; the iteration's own tolerance when it stops before full precision (an optimiser's `g_tol`, say). Say in a comment why, when it is not `1e-8`.
+
+**Random results** (a bootstrap, a simulation) change when the random numbers change, and the stream of Julia's default generators (`Xoshiro`, `MersenneTwister`, `Random.default_rng()`) may change with a minor release of Julia. Save them only when the method's function takes an `rng` keyword, and pass it a `StableRNG(seed)` of StableRNGs.jl, whose stream stays the same across versions. A random result whose function takes no `rng` gets no reference test: its target, with its tolerance, checks it.
+
+**Properties** follow from the method, never from its results: say in a comment why each must hold. One to three are enough, for instance:
+
+- the result does not depend on the order of the observations (most estimators; not a time series model, whose order is its time);
+- a result changes as the method says it must when the data are transformed: estimates scale with a rescaled variable, an intercept takes a constant added to the response;
+- a result stays within its bounds: a probability between 0 and 1, a variance or a standard error not negative, a lower confidence bound below the upper.
+
+Generate what the property varies (a seed for a permutation, a scale, a temperature), not whole data sets: the method's own inputs are the data. Every `@check` takes `db=false`, so that it writes no database of counterexamples into the package, and `rng=Xoshiro(1)`; keep `max_examples` small (10 to 50), as each example runs the method. A property that fails is a finding: report it, and never weaken the property to make it pass.
+
+**Saving the references.** ReferenceTests saves a reference that does not exist yet, and passes, rather than failing; the test command saves it in the package it makes, which it rewrites on the next run. So:
+
+1. Make the folder `tests/references` (empty), write `tests/tests.jl` and the `[tests]` table, and run the test command. Its output says, for each reference, *Reference file for "..." did not exist. It has been created*, with its content and its path in the package (`test/tests/references/`).
+2. Check each saved reference against the result it should hold, then copy the files into the method folder's `tests/references/`.
+3. Run the test command again: it must pass with no *did not exist* in its output.
+
+A reference test that fails later says *Reference Test for "..." failed*, with the reference and the new result. Find the cause before anything else; replace a reference only when the new result is known to be right (a corrected method, a deliberate change), by deleting the file in `tests/references/` and saving it again as in steps 1 to 3.
+
+If `[tests]` already names a file (cross-tests, say), keep it: add `"tests/tests.jl"` and `"tests/references"` to `copy`, include `tests/tests.jl` at the end of that file with the path from it (`include("../tests/tests.jl")` from `crosstest/tests.jl`), and add the packages to `packages`.
 
 ## The Pollis registry rules
 
