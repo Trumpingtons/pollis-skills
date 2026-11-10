@@ -1,11 +1,11 @@
 ---
 name: write-method
-description: "Write a Pollis method: the Julia code of a published statistical method, in a method folder made on its page in Pollis (Compose > New Methods > Create Methods), so that it reproduces the article's tables (the targets) to the digits printed, tested with Pollis' package script. Triggers include 'write a method', 'write the code of this method', 'reproduce the tables of this article', 'implement the method in this folder', 'make the targets pass', 'Write a Method'. The prepare-method skill then brings it up to the Pollis registry rules."
+description: "Write a Pollis method: the Julia code of a published statistical method, in a method folder made on its page in Pollis (Compose > Replication > Create Article Method), so that it reproduces the article's tables (the targets) to the digits printed, tested with Pollis' package script. Triggers include 'write a method', 'write the code of this method', 'reproduce the tables of this article', 'implement the method in this folder', 'make the targets pass', 'Write a Method'. The prepare-method skill then brings it up to the Pollis registry rules."
 ---
 
 # Write a Method
 
-Writes the Julia code of a Pollis method: a published statistical method whose tests are the article's own tables. The user has made the method's folder on its page in Pollis (**Compose > New Methods > Create Methods**): the links to the article and the data, and the published tables, typed in as printed. You write `src/NAME.jl` so that each table is computed from the data, and test it until every printed value is reproduced.
+Writes the Julia code of a Pollis method: a published statistical method whose tests are the article's own tables. The user has made the method's folder on its page in Pollis (**Compose > Replication > Create Article Method**): the links to the article and the data, and the published tables, typed in as printed. You write `src/NAME.jl` so that each table is computed from the data, and test it until every printed value is reproduced.
 
 Read `reference.md`, next to this SKILL.md, before anything else: the method folder, method.toml, the target tables, the test command and the registry rules.
 
@@ -14,7 +14,7 @@ Read `reference.md`, next to this SKILL.md, before anything else: the method fol
 The first message from Pollis names the method folder and gives the test command, with its paths. If it does not (the skill was started some other way):
 
 - **The folder**: the current folder if it has a `method.toml`; else list the folders of `~/.pollis/methods` that have one, and ask which.
-- **The test command**: ask the user to start this task from Pollis instead, with **Write Method** on the method's page (**Compose > New Methods > Browse Methods**, then the method's title), which gives it. Do not look for Pollis' script yourself.
+- **The test command**: ask the user to start this task from Pollis instead, with **Write Method** on the method's page (**Compose > Replication > Browse Article Methods**, then the method's title), which gives it. Do not look for Pollis' script yourself.
 
 It needs Julia (`julia --version`) and the internet, to read the article and download the data. If Julia is missing, tell the user to install it with juliaup and stop.
 

@@ -5,7 +5,7 @@ description: "Plan a Pollis replication: read the article of a replication made 
 
 # Plan a Replication
 
-Proposes the plan of a Pollis replication: for each target table, how Julia can compute it. You read the article and propose; you write no code and run nothing but small checks of what a package offers. The user checks the plan on the replication's page and saves it there.
+Proposes the plan of a Pollis replication: for each target table, how Julia can compute it. You read the article and propose; you write no code and run nothing but small checks of what a package offers. The user checks the plan in the Plan step of the replication's page, which saves each change.
 
 ## What you are given
 
@@ -32,7 +32,7 @@ The first message from Pollis names the replication folder. If it does not (the 
    ```
 
    `way` is `"package"`, `"notebook"` or `"method"`; `packages` the packages, separated by commas, empty for `notebook` and `method`; `note` what computes the table and the options, in one line, with the page or section of the article.
-5. **Report**: the plan, target by target, with what you could not settle from the article. Then the next steps, on the replication's page: check and save the plan in **Plan**; **Make a Method** for a target planned as a new method, if the user wants one; then **Replicate with Agent**.
+5. **Report**: the plan, target by target, with what you could not settle from the article. Then the next steps, on the replication's page: check the plan in **Plan**; **Make a Method**, on the row of a target planned as a new method, if the user wants one; then **Replicate with Agent**.
 
 ## Rules
 

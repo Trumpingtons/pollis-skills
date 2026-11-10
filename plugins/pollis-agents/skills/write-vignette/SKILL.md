@@ -5,7 +5,7 @@ description: "Write the vignette of a Pollis method: a two-page LaTeX document, 
 
 # Write a Vignette
 
-Writes the vignette of a Pollis method: about two pages that a reader can trust without running anything. What the article asked, what the method computes, every value the tests check beside the published one, what is still open, and the references. The method's folder was made in Pollis (**Compose > New Methods > Create Methods**) and its code written with the write-method skill; read `../write-method/reference.md` for the method folder, method.toml and the test command.
+Writes the vignette of a Pollis method: about two pages that a reader can trust without running anything. What the article asked, what the method computes, every value the tests check beside the published one, what is still open, and the references. The method's folder was made in Pollis (**Compose > Replication > Create Article Method**) and its code written with the write-method skill; read `../write-method/reference.md` for the method folder, method.toml and the test command.
 
 The vignette is `vignette/NAME.tex` in the method folder (NAME is the method's `name`), with its PDF beside it. Package and Publish, on the method's page, puts it in the package.
 
@@ -14,7 +14,7 @@ The vignette is `vignette/NAME.tex` in the method folder (NAME is the method's `
 The first message from Pollis names the method folder and gives the test command, with its paths. If it does not (the skill was started some other way):
 
 - **The folder**: the current folder if it has a `method.toml`; else list the folders of `~/.pollis/methods` that have one, and ask which.
-- **The test command**: ask the user to start this task from Pollis instead, with Write Vignette on the method's page (**Compose > New Methods > Browse Methods**, then the method's title), which gives it.
+- **The test command**: ask the user to start this task from Pollis instead, with Write Vignette on the method's page (**Compose > Replication > Browse Article Methods**, then the method's title), which gives it.
 
 Next to this SKILL.md are `vignette_style.tex` (the look: fonts, colours, the macros below) and `template.tex` (the sections, to fill in).
 
@@ -46,7 +46,7 @@ Next to this SKILL.md are `vignette_style.tex` (the look: fonts, colours, the ma
 
 ## Macros
 
-`\nmsection{...}` and `\nmsub{...}` for headings; `\fn{...}` for code; `\menupath{Compose \gt New Methods}` for a Pollis menu; `\begin{pbox}{Title}...\end{pbox}` for a pale box, `nbox` for a dark one (at most one box); `\ok` and `\no` in the value table. The engine is XeTeX: write `°`, `é`, `–` directly or as LaTeX, never `\usepackage{inputenc}`.
+`\nmsection{...}` and `\nmsub{...}` for headings; `\fn{...}` for code; `\menupath{Compose \gt Replication}` for a Pollis menu; `\begin{pbox}{Title}...\end{pbox}` for a pale box, `nbox` for a dark one (at most one box); `\ok` and `\no` in the value table. The engine is XeTeX: write `°`, `é`, `–` directly or as LaTeX, never `\usepackage{inputenc}`.
 
 ## Rules
 

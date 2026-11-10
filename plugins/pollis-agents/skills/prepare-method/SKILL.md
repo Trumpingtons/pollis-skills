@@ -14,7 +14,7 @@ Read `reference.md` in the `write-method` skill, next to this skill's folder (`.
 The first message from Pollis names the method folder and gives the test command, with its paths. If it does not (the skill was started some other way):
 
 - **The folder**: the current folder if it has a `method.toml`; else list the folders of `~/.pollis/methods` that have one, and ask which.
-- **The test command**: ask the user to start this task from Pollis instead, with **Prepare for Registration** on the method's page (**Compose > New Methods > Browse Methods**, then the method's title), which gives it. Do not look for Pollis' script yourself.
+- **The test command**: ask the user to start this task from Pollis instead, with **Prepare for Registration** on the method's page (**Compose > Replication > Browse Article Methods**, then the method's title), which gives it. Do not look for Pollis' script yourself.
 
 It needs Julia (`julia --version`). If Julia is missing, tell the user to install it with juliaup and stop.
 

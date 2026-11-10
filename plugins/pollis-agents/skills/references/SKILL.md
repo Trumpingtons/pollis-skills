@@ -75,7 +75,7 @@ With BibTeX (preferred: reports, longer documents), natbib and hyperref give lin
 
 Use the starred forms (`\citet*`, `\citep*`, `\citealt*`) so every author is written out. In Pollis, Compile LaTeX and the reports find pollis.bib without a copy: PollisTeX passes its folder to Tectonic (`compile("report.tex"; searchpath = [folder])`). Elsewhere, copy `pollis.bib` next to the document, or write a `.bib` with just the entries it cites, taken from pollis.bib.
 
-Without BibTeX (short standalone documents, such as the New Methods write-ups), define a citation and an entry macro, and write the References by hand in the format above:
+Without BibTeX (short standalone documents, such as the Article Methods write-ups), define a citation and an entry macro, and write the References by hand in the format above:
 
 ```latex
 \newcommand{\refcite}[2]{\hyperlink{ref:#1}{#2}}
