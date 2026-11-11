@@ -365,7 +365,7 @@ async function build(source, specFile, outDir, overwrite) {
 	}
 	const version = typeof extension.version === 'string' ? extension.version : '0.1.0';
 	if (!/^\d+\.\d+\.\d+$/.test(version)) {
-		fail(`the version ${version} must look like 1.0.0`);
+		fail(`the version ${version} must look like 0.1.0`);
 	}
 	const folder = path.join(outDir, name);
 	if (fs.existsSync(folder)) {

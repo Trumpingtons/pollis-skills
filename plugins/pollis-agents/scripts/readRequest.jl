@@ -56,11 +56,11 @@ function strings(name, value)
 end
 
 function toolbox(; name::AbstractString, displayName::AbstractString, description::AbstractString = "",
-		author::AbstractString = "", version::AbstractString = "1.0.0")
+		author::AbstractString = "", version::AbstractString = "0.1.0")
 	isempty(TOOLBOX) || fail("toolbox(...) is called more than once: a request makes one toolbox")
 	occursin(ID_PATTERN, name) || fail("toolbox name \"$name\": use lower case letters, digits and hyphens")
 	isempty(strip(displayName)) && fail("toolbox displayName is empty")
-	occursin(r"^\d+\.\d+\.\d+$", version) || fail("toolbox version \"$version\": write it as 1.0.0")
+	occursin(r"^\d+\.\d+\.\d+$", version) || fail("toolbox version \"$version\": write it as 0.1.0")
 	merge!(TOOLBOX, fields("name" => name, "displayName" => strip(displayName),
 		"description" => strip(description), "author" => strip(author), "version" => version))
 	return nothing
