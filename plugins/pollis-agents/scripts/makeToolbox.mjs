@@ -13,9 +13,11 @@
 //   node makeToolbox.mjs pack <toolbox folder> [--out <dir>]
 //   any command: [--source <url or folder>]           where Pollis' files are read from
 //
-// build writes <out>/<name>/ (package.json, panels/, wiki/, notebooks/, docs/, icon.png, README.md) and
-// <out>/<name>-<version>.vsix; <out> defaults to the current folder. pack packages a toolbox folder
-// again, e.g. after its README was edited.
+// build writes the toolbox in its folder, <out>/<name>/ (package.json, panels/, wiki/, notebooks/, docs/,
+// icon.png, README.md), and packages it as <out>/<name>/dist/<name>-<version>.vsix; <out> defaults to the
+// current folder. The folder keeps what the build does not write: the spec, the sources of the vignette and
+// dist/, so a toolbox is one folder (toolboxes/<name>/ in a Pollis Workspace). pack packages a toolbox
+// folder again, e.g. after its README was edited, into its dist/ unless --out names another folder.
 //
 // Pollis' files are read from https://raw.githubusercontent.com/saragga/pollis/main/ (this plugin
 // lives in another repository, Trumpingtons/pollis-skills): first the panel index
@@ -140,6 +142,15 @@ function parseSpec(parser, text) {
 /** @param {unknown} value @returns {TomlTable[]} */
 function tables(value) {
 	return Array.isArray(value) ? value : [];
+}
+
+/** What a build writes in a toolbox folder, and all a .vsix holds of it; the folder may keep other files, its spec say. */
+const BUILT = ['package.json', 'README.md', 'icon.png', 'panels', 'wiki', 'notebooks', 'docs'];
+
+/** Whether `file` is `folder` or inside it. @param {string} file @param {string} folder */
+function isInside(file, folder) {
+	const relative = path.relative(folder, file);
+	return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
 }
 
 /** The wiki and notebook entries of a panel TOML, by the toolbox folder they go in. @param {TomlTable} toml */
@@ -368,11 +379,30 @@ async function build(source, specFile, outDir, overwrite) {
 		fail(`the version ${version} must look like 0.1.0`);
 	}
 	const folder = path.join(outDir, name);
-	if (fs.existsSync(folder)) {
-		if (!overwrite) {
-			fail(`${folder} exists: pass --overwrite to write it again`);
+	// The user's own files, the spec, the panels of their own with their wiki and notebook folders and the
+	// sources of the vignette, are never where the build writes
+	const ownFiles = [path.resolve(specFile), ...menus.flatMap(menu => [
+		...tables(menu.items).flatMap(item => typeof item.toml === 'string' ? [item.toml, path.join(path.dirname(item.toml), 'wiki'), path.join(path.dirname(item.toml), 'notebooks')] : []),
+		...tables(menu.documents).flatMap(document => typeof document.source === 'string' ? [path.dirname(document.source)] : []),
+	].map(file => path.resolve(path.dirname(specFile), file)))];
+	for (const entry of BUILT) {
+		const own = ownFiles.find(file => isInside(file, path.join(folder, entry)));
+		if (own) {
+			fail(`the build writes ${path.join(folder, entry)}, over ${own}: keep the panels of your own out of the toolbox folder, in the panels folder of the Pollis Workspace say`);
 		}
-		fs.rmSync(folder, { recursive: true });
+	}
+	if (fs.existsSync(path.join(folder, 'package.json'))) {
+		if (!overwrite) {
+			fail(`${folder} has a toolbox built already: pass --overwrite to build it again`);
+		}
+		for (const entry of BUILT) {
+			fs.rmSync(path.join(folder, entry), { recursive: true, force: true });
+		}
+	} else {
+		const found = BUILT.find(entry => fs.existsSync(path.join(folder, entry)));
+		if (found) {
+			fail(`${folder} has ${found}, which the build writes: move it out of the toolbox folder first`);
+		}
 	}
 
 	/** @type {Set<string>} the copies' panel ids, to find the panels listed twice */
@@ -726,7 +756,7 @@ function vsixManifestXml(manifest, hasReadme) {
 	].join('\n');
 }
 
-/** Writes `<outDir>/<name>-<version>.vsix` from a toolbox folder and returns its path. @param {string} folder @param {string} outDir */
+/** Writes `<outDir>/<name>-<version>.vsix` from the files a build writes in a toolbox folder and returns its path. @param {string} folder @param {string} outDir */
 function pack(folder, outDir) {
 	const manifestFile = path.join(folder, 'package.json');
 	if (!fs.existsSync(manifestFile)) {
@@ -736,7 +766,7 @@ function pack(folder, outDir) {
 	if (!manifest.name || !manifest.publisher || !manifest.version || !manifest.contributes?.pollisToolboxes) {
 		fail(`${manifestFile} is not a Pollis toolbox (it needs a name, a publisher, a version and a pollisToolboxes contribution)`);
 	}
-	const files = listFiles(folder);
+	const files = listFiles(folder).filter(file => BUILT.includes(file.split('/')[0]));
 	if (manifest.icon && !files.includes(manifest.icon)) {
 		fail(`${manifestFile} names the icon ${manifest.icon}, which does not exist`);
 	}
@@ -825,7 +855,7 @@ async function main() {
 				fail('usage: node makeToolbox.mjs build <spec.toml> [--out <dir>] [--overwrite] [--source <url or folder>]');
 			}
 			const folder = await build(source, rest[0], outDir, options.overwrite === true);
-			pack(folder, outDir);
+			pack(folder, path.join(folder, 'dist'));
 			console.log('Next: fill the "What it covers" column of its README.md, then run pack on the folder to package it again.');
 			break;
 		}
@@ -833,7 +863,7 @@ async function main() {
 			if (rest.length !== 1) {
 				fail('usage: node makeToolbox.mjs pack <toolbox folder> [--out <dir>]');
 			}
-			pack(path.resolve(rest[0]), typeof options.out === 'string' ? outDir : path.dirname(path.resolve(rest[0])));
+			pack(path.resolve(rest[0]), typeof options.out === 'string' ? outDir : path.join(path.resolve(rest[0]), 'dist'));
 			break;
 		default:
 			fail('usage: node makeToolbox.mjs list [words...] | build <spec.toml> | pack <toolbox folder>  (see the top of this file)');

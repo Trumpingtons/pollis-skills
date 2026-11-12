@@ -21,7 +21,7 @@ Each panel in the toolbox is an independent copy of the Pollis panel, with its k
 
 ## Install the plugin
 
-In Pollis, there is nothing to install: use **Compose > New Panels** (**Create a Panel...**, **Create Panels from a Request...**), **Compose > Package a Toolbox...** and the buttons of a method's page, from **Compose > Replication > Create Article Method** or **Browse Article Methods** (**Write Method**, **Write Vignette**, **Prepare for Registration**, **Add from Article**), those of a replication's page, from **Compose > Replication > Replicate an Article...** or **Browse Replications** (**Plan with Agent**, **Replicate with Agent**, **Explain with Agent**, **Add from Article**), **Speed Up with Agent** on the page of **Compose > Profiling > Speed Up a Function...**, and **Polish with Agent...** in **Compose > Reports**. Pollis downloads the skills (the files listed in `files.json`) to `~/.pollis/agents/pollis-agents` and starts a coding agent in a terminal, pointed at the skill. The first time, it asks which agent to use: Claude Code, Codex, GitHub Copilot CLI or OpenCode, each on a cloud model or a local one, or any other command; change it later with **Compose > Coding Agent**. To use the skills in your agent outside Pollis, click **Install Skills in Coding Agent...** in **Compose > Agent Skills** and pick your agent: Claude Code gets the plugin from its marketplace, the other agents get the skill folders in `~/.agents/skills`. Creating a panel asks a lot of the model: a small local model will make mistakes the validator cannot catch.
+In Pollis, there is nothing to install: use **Compose > New Panels** (**Create a Panel...**, **Create Panels from a Request...**), **Compose > Package a Toolbox...** and the buttons of a method's page, from **Compose > Replication > Create Article Method** or **Browse Article Methods** (**Write Method**, **Write Vignette**, **Prepare for Registration**, **Add from Article**), those of a replication's page, from **Compose > Replication > Replicate an Article...** or **Browse Replications** (**Ask Agent** of the Plan step, **Replicate with Agent**, **Explain with Agent**, **Add from Article**), **Speed Up with Agent** on the page of **Compose > Profiling > Speed Up a Function...**, and **Polish with Agent...** in **Compose > Reports**. Pollis downloads the skills (the files listed in `files.json`) to `~/.pollis/agents/pollis-agents` and starts a coding agent in a terminal, pointed at the skill. The first time, it asks which agent to use: Claude Code, Codex, GitHub Copilot CLI or OpenCode, each on a cloud model or a local one, or any other command; change it later with **Compose > Coding Agent**. To use the skills in your agent outside Pollis, click **Install Skills in Coding Agent...** in **Compose > Agent Skills** and pick your agent: Claude Code gets the plugin from its marketplace, the other agents get the skill folders in `~/.agents/skills`. Creating a panel asks a lot of the model: a small local model will make mistakes the validator cannot catch.
 
 In Claude Code, the plugin can also be installed directly: `/plugin marketplace add Trumpingtons/pollis-skills`, then `/plugin install pollis-agents@pollis`.
 
@@ -58,14 +58,15 @@ panel = "ht"
 title = "3. Hypothesis Tests"
 ```
 
-A toolbox does not choose its menu: its submenu goes at the end of Extend, and the user can move it, or any of its panels, to another menu with its Edit button. `inline = true` puts the entries straight into Extend instead of a submenu of their own. The full format is at the top of `scripts/makeToolbox.mjs`.
+A toolbox does not choose its menu: its submenu goes at the end of Extend, and the user can move it, or any of its panels, to another menu with its Edit button. `inline = true` puts the entries straight into Extend instead of a submenu of their own. The full format is at the top of `scripts/makeToolbox.mjs`. Each toolbox has a folder of its own, which holds its spec, the sources of its vignette, what the build writes and the `.vsix` files in `dist/`: `toolboxes/<name>/` in a Pollis Workspace, else `~/.pollis/toolboxes/<name>/`.
 
 You can also run the builder yourself:
 
 ```
 node scripts/makeToolbox.mjs list regression          # find panels and their commands
-node scripts/makeToolbox.mjs build stats101.toml      # writes pollis-toolbox-stats101/ and pollis-toolbox-stats101-0.1.0.vsix
-node scripts/makeToolbox.mjs pack pollis-toolbox-stats101   # package again after editing its README
+node scripts/makeToolbox.mjs build toolboxes/pollis-toolbox-stats101/toolbox.toml --out toolboxes
+    # writes the toolbox in toolboxes/pollis-toolbox-stats101/, beside its spec, and dist/pollis-toolbox-stats101-0.1.0.vsix there
+node scripts/makeToolbox.mjs pack toolboxes/pollis-toolbox-stats101   # package again after editing its README
 ```
 
 ## Create a panel

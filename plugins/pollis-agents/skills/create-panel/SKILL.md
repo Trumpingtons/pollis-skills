@@ -2,7 +2,7 @@
 name: create-panel
 description: "Create a new Pollis panel on a topic the user chooses: write its panel TOML (models, key points, decision table, inputs, example code, Next Steps, references), its wiki pages and notebook tutorials, check it with the validator, and package it as a toolbox. Triggers include 'create a panel', 'make a new panel on', 'write a Pollis panel for', 'Panel Agent', 'add a panel about', 'I want a panel for my course on', 'create the panels of this request', 'run my panel request'."
 metadata:
-  updated: "2026-11-06"
+  updated: "2026-11-12"
 ---
 
 # Create a Panel
@@ -28,7 +28,7 @@ Ask in one message, and wait for the answers:
 - the topic, and who the panel is for (a course, a research group, the user's own work);
 - the models or methods it covers: they become the tabs of the panel (one to eight);
 - the Julia packages to use, if the user has a preference;
-- the folder to write it in (default: `pollis-panels/` in the toolboxes folder, `~/.pollis/toolboxes/`, or in the open folder when it is a Pollis Workspace, with a `pollis.toml` file);
+- the folder to write it in (default: the panels folder of the Pollis Workspace open, when the open folder has a `pollis.toml` file, the folder the `panels` line of its `[folders]` table names, else `panels/`; otherwise `~/.pollis/toolboxes/pollis-panels/`);
 - whether it goes into a new toolbox or an existing toolbox spec, and where to publish that toolbox: nowhere, a GitHub repository of the user's own, or proposed for the Toolboxes section of Pollis (the `package-toolbox` skill asks the details, step 6).
 
 Then propose, in a short list: the panel id (lower case letters, digits and hyphens, short: `garch`, `survival`), its title, the model ids and labels, the inputs of each model, and the Next Steps. Go on when the user agrees.
@@ -66,8 +66,8 @@ Then, without asking:
 - **Make the choices of 1a yourself**: the id (the request's `id`, or a short one from the topic), the title (the request's `title`, or one from the topic), the model ids and labels from `methods`, the inputs, the Next Steps. Use the request's `packages` when given, otherwise the packages you would propose.
 - **Fit the panel to the audience**: for `students` (or a course), plain key points, few inputs with defaults that work, wiki pages that explain from first principles, a notebook that goes slowly; for `research` (or researchers), more options and diagnostics, the primary papers in the references; anything else, read it as the user's description of who will use the panel. With no audience, write for a general user of Pollis.
 - **When a panel cannot be written** (no working Julia package for a method, the validator or Julia still failing after you fixed what you could), leave it out, say why in the report, and go on with the next.
-- **Pick up where a run stopped**: a long request can outlast one session. Before writing a panel, look in `pollis-panels/` for its TOML, which you start with the comment line `# Request topic: <topic>`: if it is there and the validator reports no errors, keep it and go on to the next. Tell the user how many panels were already done.
-- Write the panels in a folder `pollis-panels/`, and the toolbox spec next to it as `<toolbox name>.toml`, in the toolboxes folder `~/.pollis/toolboxes/` (create it when missing), or in the open folder when it is a Pollis Workspace (it has a `pollis.toml` file), or in the folder the request file names. Report the full paths.
+- **Pick up where a run stopped**: a long request can outlast one session. Before writing a panel, look in the panels folder for its TOML, which you start with the comment line `# Request topic: <topic>`: if it is there and the validator reports no errors, keep it and go on to the next. Tell the user how many panels were already done.
+- Write the panels in the panels folder: that of the Pollis Workspace open, when the open folder has a `pollis.toml` file (the folder the `panels` line of its `[folders]` table names, else `panels/`), otherwise `~/.pollis/toolboxes/pollis-panels/`, or the folder the request file names. Write the toolbox spec as `toolbox.toml` in the toolbox's own folder, `<toolboxes folder>/<toolbox name>/`, as the `package-toolbox` skill says under *Where the toolbox is saved*, with each panel as `toml = "<path>"` relative to it. Create the folders when missing. Report the full paths.
 
 ## 2. Write
 
@@ -113,7 +113,7 @@ Hand over to the `package-toolbox` skill: in its spec, a panel of the user's own
 
 ```toml
 [[menu.items]]
-toml = "pollis-panels/garch.toml"     # relative to the spec
+toml = "../../panels/garch.toml"     # relative to the spec, <toolboxes folder>/<name>/toolbox.toml
 title = "GARCH Models"                # optional menu title, default: the panel's title
 ```
 
