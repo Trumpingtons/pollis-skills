@@ -1,6 +1,6 @@
 # The Pollis method format
 
-A Pollis method is a published statistical method turned into a Julia package whose tests are the article's own tables. The user makes the method's folder on its page in Pollis (**Compose > Replication > Create Article Method**; **Browse Article Methods** reopens it later): they link the article and the data, type in the published tables (or ask the coding agent to, from the article) and name it. The coding agent writes the code (the `write-method` skill) and brings it up to the registry rules (the `prepare-method` skill). Package and Publish, the last step of the method's page, then makes the package, runs its tests and, when the user asks, pushes it to GitHub and registers it in the Pollis registry.
+A Pollis method is a published statistical method turned into a Julia package whose tests are the article's own tables. The user makes the method's folder on its page in Pollis (**Compose > Article Replication > Create Article Method**; **Browse Article Methods** reopens it later): they link the article and the data, type in the published tables (or ask the coding agent to, from the article) and name it. The coding agent writes the code (the `write-method` skill) and brings it up to the registry rules (the `prepare-method` skill). Package and Publish, the last step of the method's page, then makes the package, runs its tests and, when the user asks, pushes it to GitHub and registers it in the Pollis registry.
 
 ## The folder
 

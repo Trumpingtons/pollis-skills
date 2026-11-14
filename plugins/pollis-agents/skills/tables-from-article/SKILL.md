@@ -16,8 +16,8 @@ The first message from Pollis names the folder, the tables (for example `3.2, 5.
 or input data. The folder holds `method.toml` (a method) or `replication.toml` (a replication): this is the folder's
 record, and everything below goes in it. If the message does not say these things (the skill was started some other
 way), ask the user to start this task from Pollis instead, with **Add from Article** in Article and Data, on the
-page of the method (**Compose > Replication > Browse Article Methods**, then the method's title) or of the replication
-(**Compose > Replication > Browse Replications**, then the replication's title).
+page of the method (**Compose > Article Replication > Browse Article Methods**, then the method's title) or of the replication
+(**Compose > Article Replication > Browse Replications**, then the replication's title).
 
 ## Steps
 

@@ -7,7 +7,7 @@ metadata:
 
 # Write a Vignette
 
-Writes the vignette of a Pollis method: about two pages that a reader can trust without running anything. What the article asked, what the method computes, every value the tests check beside the published one, what is still open, and the references. The method's folder was made in Pollis (**Compose > Replication > Create Article Method**) and its code written with the write-method skill; read `../write-method/reference.md` for the method folder, method.toml and the test command.
+Writes the vignette of a Pollis method: about two pages that a reader can trust without running anything. What the article asked, what the method computes, every value the tests check beside the published one, what is still open, and the references. The method's folder was made in Pollis (**Compose > Article Replication > Create Article Method**) and its code written with the write-method skill; read `../write-method/reference.md` for the method folder, method.toml and the test command.
 
 The vignette is `vignette/NAME.tex` in the method folder (NAME is the method's `name`), with its PDF beside it. Package and Publish, on the method's page, puts it in the package.
 
@@ -16,7 +16,7 @@ The vignette is `vignette/NAME.tex` in the method folder (NAME is the method's `
 The first message from Pollis names the method folder and gives the test command, with its paths. If it does not (the skill was started some other way):
 
 - **The folder**: the current folder if it has a `method.toml`; else list the folders of `~/.pollis/methods` that have one, and ask which.
-- **The test command**: ask the user to start this task from Pollis instead, with Write Vignette on the method's page (**Compose > Replication > Browse Article Methods**, then the method's title), which gives it.
+- **The test command**: ask the user to start this task from Pollis instead, with Write Vignette on the method's page (**Compose > Article Replication > Browse Article Methods**, then the method's title), which gives it.
 
 Next to this SKILL.md are `vignette_style.tex` (the look: fonts, colours, the macros below) and `template.tex` (the sections, to fill in).
 

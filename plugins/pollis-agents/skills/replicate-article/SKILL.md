@@ -1,17 +1,17 @@
 ---
 name: replicate-article
-description: "Replicate an article in a Pollis replication: write the replication's Julia notebook, in a folder made on its page in Pollis (Compose > Replication > Replicate an Article), so that it reproduces the article's published tables (the targets) from its data, each printed value beside Julia's in results.csv, through Pollis.replicate and Pollis.compare. Triggers include 'replicate this article', 'write the replication notebook', 'reproduce the published tables', 'Replicate with Agent'."
+description: "Replicate an article in a Pollis replication: write the replication's Julia notebook, in a folder made on its page in Pollis (Compose > Article Replication > Replicate an Article), so that it reproduces the article's published tables (the targets) from its data, each printed value beside Julia's in results.csv, through Pollis.replicate and Pollis.compare. Triggers include 'replicate this article', 'write the replication notebook', 'reproduce the published tables', 'Replicate with Agent'."
 metadata:
   updated: "2026-11-10"
 ---
 
 # Replicate an Article
 
-Writes the notebook of a Pollis replication: the analysis of a published article, in Julia, run on the article's data, with every value of its published tables set beside Julia's. The user has made the replication's folder on its page in Pollis (**Compose > Replication > Replicate an Article...**): the links to the article and the data, and the published tables, typed in as printed. You write `NAME.ipynb` so that each target table is computed from the data and compared with the printed values, and run it until as many as can be are reproduced.
+Writes the notebook of a Pollis replication: the analysis of a published article, in Julia, run on the article's data, with every value of its published tables set beside Julia's. The user has made the replication's folder on its page in Pollis (**Compose > Article Replication > Replicate an Article...**): the links to the article and the data, and the published tables, typed in as printed. You write `NAME.ipynb` so that each target table is computed from the data and compared with the printed values, and run it until as many as can be are reproduced.
 
 ## What you are given
 
-The first message from Pollis names the replication folder and the file of Pollis' Julia functions, `Pollis.jl`. If it does not (the skill was started some other way), ask the user to start this task from Pollis instead, with **Replicate with Agent** on the replication's page (**Compose > Replication > Browse Replications**, then the replication's title). Do not look for Pollis' files yourself.
+The first message from Pollis names the replication folder and the file of Pollis' Julia functions, `Pollis.jl`. If it does not (the skill was started some other way), ask the user to start this task from Pollis instead, with **Replicate with Agent** on the replication's page (**Compose > Article Replication > Browse Replications**, then the replication's title). Do not look for Pollis' files yourself.
 
 It needs Julia (`julia --version`) and the internet, to read the article and download the data. If Julia is missing, tell the user to install it with juliaup and stop.
 

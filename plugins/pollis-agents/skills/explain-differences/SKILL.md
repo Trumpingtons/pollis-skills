@@ -11,7 +11,7 @@ Looks into each published value of a Pollis replication that Julia does not repr
 
 ## What you are given
 
-The first message from Pollis names the replication folder and the file of Pollis' Julia functions, `Pollis.jl`. If it does not (the skill was started some other way), ask the user to start this task from Pollis instead, with **Explain with Agent** in the Compare step of the replication's page (**Compose > Replication > Browse Replications**, then the replication's title).
+The first message from Pollis names the replication folder and the file of Pollis' Julia functions, `Pollis.jl`. If it does not (the skill was started some other way), ask the user to start this task from Pollis instead, with **Explain with Agent** in the Compare step of the replication's page (**Compose > Article Replication > Browse Replications**, then the replication's title).
 
 ## The kinds
 

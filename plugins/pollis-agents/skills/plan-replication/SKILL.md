@@ -1,6 +1,6 @@
 ---
 name: plan-replication
-description: "Plan a Pollis replication: read the article of a replication made on its page in Pollis (Compose > Replication > Replicate an Article) and propose, for each target table, how it is computed: by registered Julia packages, by code of the notebook's own, or by a new method, written in the replication's plan for the user to check. Reads and proposes; writes no code. Triggers include 'plan this replication', 'which packages compute these tables', 'Plan with Agent'."
+description: "Plan a Pollis replication: read the article of a replication made on its page in Pollis (Compose > Article Replication > Replicate an Article) and propose, for each target table, how it is computed: by registered Julia packages, by code of the notebook's own, or by a new method, written in the replication's plan for the user to check. Reads and proposes; writes no code. Triggers include 'plan this replication', 'which packages compute these tables', 'Plan with Agent'."
 metadata:
   updated: "2026-11-10"
 ---
@@ -11,7 +11,7 @@ Proposes the plan of a Pollis replication: for each target table, how Julia can 
 
 ## What you are given
 
-The first message from Pollis names the replication folder. If it does not (the skill was started some other way), ask the user to start this task from Pollis instead, with **Ask Agent** in the Plan step of the replication's page (**Compose > Replication > Browse Replications**, then the replication's title).
+The first message from Pollis names the replication folder. If it does not (the skill was started some other way), ask the user to start this task from Pollis instead, with **Ask Agent** in the Plan step of the replication's page (**Compose > Article Replication > Browse Replications**, then the replication's title).
 
 ## The three ways
 
