@@ -56,7 +56,7 @@ julia -e 'using PollisTeX; display(compile("report.tex"; searchpath = ["/the/fol
 ```
 
 (`slides.tex` for slides; if PollisTeX is missing, add it first with
-`julia -e 'import Pkg; Pkg.add(url = "https://github.com/Trumpingtons/PollisTeX.jl")'`.) It prints `PDF: …`, then
+`julia -e 'import Pkg; any(r -> r.name == "PollisRegistry", Pkg.Registry.reachable_registries()) || Pkg.Registry.add(Pkg.RegistrySpec(url = "https://github.com/Trumpingtons/PollisRegistry")); Pkg.add("PollisTeX")'`.) It prints `PDF: …`, then
 only the problems, as `error: file.tex:LINE: message` or `warning: …`. Fix each error at its line. Read only those
 lines: never open the `.log`. Compile at most five times; if errors remain, stop and list them.
 

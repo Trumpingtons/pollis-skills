@@ -42,7 +42,7 @@ Next to this SKILL.md are `vignette_style.tex` (the look: fonts, colours, the ma
    julia -e 'using PollisTeX; display(compile("NAME.tex"))'
    ```
 
-   If PollisTeX is missing, add it first with `julia -e 'import Pkg; Pkg.add(url = "https://github.com/Trumpingtons/PollisTeX.jl")'`. It prints `PDF: ...`, then only the problems, as `error: file.tex:LINE: message`. Fix each error at its line; never open the `.log`. Compile at most five times; if errors remain, stop and list them. Delete the auxiliary files it leaves (keep only `NAME.tex`, `vignette_style.tex` and `NAME.pdf`).
+   If PollisTeX is missing, add it first with `julia -e 'import Pkg; any(r -> r.name == "PollisRegistry", Pkg.Registry.reachable_registries()) || Pkg.Registry.add(Pkg.RegistrySpec(url = "https://github.com/Trumpingtons/PollisRegistry")); Pkg.add("PollisTeX")'`. It prints `PDF: ...`, then only the problems, as `error: file.tex:LINE: message`. Fix each error at its line; never open the `.log`. Compile at most five times; if errors remain, stop and list them. Delete the auxiliary files it leaves (keep only `NAME.tex`, `vignette_style.tex` and `NAME.pdf`).
 6. **Keep it to two pages.** If it runs over, shorten the prose, never the value table, and compile again.
 7. **Report**: where the PDF is, how many values the table shows and how many agree, and anything you could not settle from the article. Then the next step: **Package and Publish**, on the method's page.
 
