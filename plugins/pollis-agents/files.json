@@ -1,6 +1,7 @@
 {
 	"version": 1,
 	"files": [
+		"skills/analyse-independently/SKILL.md",
 		"skills/create-panel/SKILL.md",
 		"skills/create-panel/reference.md",
 		"skills/email-alerts/SKILL.md",
