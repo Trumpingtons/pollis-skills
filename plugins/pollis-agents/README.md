@@ -98,7 +98,7 @@ A toolbox can mix new panels and Pollis' own. You can also check a panel you wro
 node scripts/validatePanel.mjs garch.toml
 ```
 
-The panel format is described in `skills/create-panel/reference.md`. A panel has no code of its own: it cannot have custom illustrations, styles or data connectors.
+The panel format is described in `skills/create-panel/reference.md`. A panel has no code of its own: it cannot have custom styles, an API key or data connectors.
 
 ## Create panels from a request
 

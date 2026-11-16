@@ -178,7 +178,7 @@ const FAQ = { question: string(true), answer: string(true), wiki: string(), hidd
 /** @type {Shape} */
 const ACTION = { id: string(true), label: string(true), desc: string(true), code: string(true), models: strings, when: string() };
 
-/** The tables of a panel TOML (meta, miniCharts, wikis and references are checked on their own). @type {Shape} */
+/** The tables of a panel TOML (meta, wikis and references are checked on their own). @type {Shape} */
 const PANEL = {
 	packages: array(PACKAGE, true),
 	requires: { type: 'table', shape: { packages: strings } },
@@ -194,7 +194,7 @@ const PANEL = {
 /** @type {Shape} */
 const META = { title: string(true), viewType: string(), defaultModel: string(true), decisionFirstColumn: string() };
 /** Sections only a panel with its own code (a template in Pollis) can use. */
-const NEEDS_CODE = { notes: 'notes', explore: 'explore', 'meta.models': 'meta.models', 'meta.illusCollapsed': 'meta.illusCollapsed', 'meta.illustrationText': 'meta.illustrationText' };
+const NEEDS_CODE = { notes: 'notes', explore: 'explore', 'meta.models': 'meta.models' };
 const INPUT_KINDS = ['text', 'select', 'textarea', 'tabs'];
 
 // --- The checks -----------------------------------------------------------------------------------
@@ -334,7 +334,7 @@ export function validate(file, text, parser, roots) {
 	for (const key of Object.keys(data)) {
 		if (key in NEEDS_CODE) {
 			report.error([key], `${key} needs a panel with its own code, which a toolbox cannot hold: remove it`);
-		} else if (!(key in PANEL) && !['meta', 'miniCharts', 'wikis', 'references'].includes(key)) {
+		} else if (!(key in PANEL) && !['meta', 'wikis', 'references'].includes(key)) {
 			report.error([key], `Pollis does not know the table ${key}`);
 		}
 	}
@@ -342,7 +342,7 @@ export function validate(file, text, parser, roots) {
 	if (!meta) {
 		report.error(['meta'], 'the panel needs [meta] with title and defaultModel');
 	} else {
-		for (const key of ['models', 'illusCollapsed', 'illustrationText']) {
+		for (const key of ['models']) {
 			if (key in meta) {
 				report.error(['meta', key], `meta.${key} needs a panel with its own code, which a toolbox cannot hold: remove it`);
 				delete meta[key];
@@ -391,14 +391,6 @@ export function validate(file, text, parser, roots) {
 			}
 		}
 	};
-	if (isTable(data.miniCharts)) {
-		for (const [model, chart] of Object.entries(data.miniCharts)) {
-			checkModels(['miniCharts', model], [model]);
-			checkShape(report, ['miniCharts', model], chart, { svg: string(true) });
-		}
-	} else if (data.miniCharts !== undefined) {
-		report.error(['miniCharts'], 'must be tables, one per model: [miniCharts.<model>] with svg = "..."');
-	}
 	const branches = tables(data.codeBranches);
 	branches.forEach((branch, index) => {
 		if (branch.model !== '*') {

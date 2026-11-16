@@ -7,7 +7,7 @@ A Pollis panel is one TOML file, plus its wiki pages (Markdown) and notebook tut
 - [The layout of a panel](#the-layout-of-a-panel)
 - [The files](#the-files)
 - [TOML as Pollis reads it](#toml-as-pollis-reads-it)
-- The sections: [meta](#meta), [packages](#packages), [requires](#requires), [models](#models), [bullets](#bullets), [decisionRows](#decisionrows), [miniCharts](#minicharts), [inputs](#inputs), [codeBranches](#codebranches), [placeholders and guards](#placeholders-and-guards), [actionGroups](#actiongroups), [wikis](#wikis), [notebookSections](#notebooksections), [references](#references), [faq](#faq)
+- The sections: [meta](#meta), [packages](#packages), [requires](#requires), [models](#models), [bullets](#bullets), [decisionRows](#decisionrows), [inputs](#inputs), [codeBranches](#codebranches), [placeholders and guards](#placeholders-and-guards), [actionGroups](#actiongroups), [wikis](#wikis), [notebookSections](#notebooksections), [references](#references), [faq](#faq)
 - [Content rules](#content-rules)
 - [What a toolbox panel cannot do](#what-a-toolbox-panel-cannot-do)
 - [Model panels](#model-panels)
@@ -20,7 +20,6 @@ From top to bottom, a panel shows:
 |---|---|
 | Title | `[meta] title` |
 | Model toggle: one tab per model | `[[models]]` |
-| Illustration: a small drawing per model | `[miniCharts.<model>]` |
 | Key Points: a bullet list | `[[bullets]]` |
 | Decision table: which model for which task | `[[decisionRows]]` |
 | Inputs: text fields, choices, sub-tabs | `[[inputs]]` |
@@ -138,20 +137,6 @@ context = "Heteroskedastic errors"
 # Use when
 purpose = "Keep OLS estimates but make standard errors valid under unknown heteroskedasticity"
 ```
-
-## miniCharts
-
-A small drawing of each model, in a 54 by 86 box. The value is the body of a JavaScript function that returns SVG elements as a string. Draw with `currentColor` so it follows the theme.
-
-```toml
-[miniCharts.gf]
-svg = '''
-return '<path d="M8,64 L44,58 L20,26 Z" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>'
-  + '<circle cx="34" cy="40" r="2" fill="currentColor"/>';
-'''
-```
-
-Optional. Give every model one, or none.
 
 ## inputs
 
@@ -394,9 +379,8 @@ Besides answering users, the FAQ is the panel's benchmark for Ask Pollis: Evalua
 A panel in a toolbox is data only: no JavaScript or CSS of its own. So it cannot have:
 
 - `[notes]` (intro and footnote text on panes) or an `[explore]` pane;
-- `models`, `illusCollapsed` or `illustrationText` in `[meta]`;
-- a custom illustration, custom styles, or a data connector with its own forms (the Excel, ECB, Alpha Vantage, Yahoo Finance, FRED, EDGAR, Hugging Face and Kaggle panels);
-- a gallery.
+- `models` in `[meta]`;
+- custom styles, an API key (the Alpha Vantage, FRED and EDGAR panels), or a data connector with its own forms (the Excel, Hugging Face and Kaggle panels).
 
 If a panel needs one of these, say so: it needs a change in Pollis itself.
 
