@@ -42,6 +42,8 @@ Read `reference.md`, beside this file, for every field of `case.toml`; read the 
    - the results everyone sees and each team alone sees, and the column that wins;
    - the news, the negotiations, and the debrief questions.
 
+   The case's icon is the user's to choose, with **Choose an Image...** in the Write step of Create a Simulation Game; keep `icon` in `case.toml` and its file as they are.
+
    Then ask whether to go ahead, and write nothing until the user agrees; change the design as they ask.
 2. **Write the case**: `case.toml` (comments above each part saying what it is for, as the cases of Pollis have), `model.jl` (a comment at the top with the model's equations and what is drawn per game, a docstring on `initial` and `play`), `briefing.md` (the game, the rules and how a team wins) and the briefings of the roles or sides in `briefings/`, and `debrief-questions.md` (questions for the class, the last one sending them to `model.jl`). Keep the title the user gave in `case.toml`.
 3. **Play every round**, in a game folder of your own outside the case's folder (a new temporary folder), as Pollis does:
@@ -62,6 +64,6 @@ A toolbox of cases is a Pollis toolbox with no panels, which others install from
 
 1. Make the toolbox's folder, `toolboxes/<name>/` of the Pollis Workspace when the case is in one (the folder that holds `pollis.toml`), else beside the case's folder; never inside the case's folder.
 2. Copy the case's folder into `games/<case folder name>/` of the toolbox.
-3. Write `package.json`: `name`, `displayName`, `description`, `version` `"0.1.0"`, `publisher`, `license`, `engines` `{ "vscode": "*" }`, `categories` `["Other"]`, and `contributes.pollisToolboxes`, one entry with an `id` (letters and digits), a `title`, `"panels": []` and `"games": [{ "folder": "games/<case folder name>" }]`; and `"icon": "icon.png"` only when the user gives a picture they may use, a square PNG.
+3. Write `package.json`: `name`, `displayName`, `description`, `version` `"0.1.0"`, `publisher`, `license`, `engines` `{ "vscode": "*" }`, `categories` `["Other"]`, and `contributes.pollisToolboxes`, one entry with an `id` (letters and digits), a `title`, `"panels": []` and `"games": [{ "folder": "games/<case folder name>" }]`; and `"icon": "icon.png"`, a copy of the case's icon (`icon` in `case.toml`) at the toolbox's root. A case without an icon: ask the user to make one in the Write step of Create a Simulation Game (**Use the Title's Initials**, or **Choose an Image...** from a picture they may use), or to go on without one; never draw or download one yourself.
 4. Write `README.md`: the title, what the case is, a table of the case (rounds, teams, decisions, what each game draws, how the teams are organised, news, negotiations, debrief), the files, the requirements (Pollis, and Julia on the facilitator's computer only), and the licence.
 5. Package it with the plugin's script, `node <plugin>/scripts/makeToolbox.mjs pack <toolbox folder>`, where `<plugin>` is the folder two levels above this skill's. It writes `dist/<name>-0.1.0.vsix` in the toolbox's folder. Report the `.vsix`'s full path and how to install it; to change the case later, change it in `games/`, raise `version` and pack again.

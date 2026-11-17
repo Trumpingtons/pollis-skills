@@ -8,6 +8,7 @@ Every field Pollis reads, as Host a Game checks it. A field not listed here is i
 |---|---|
 | `title` | The case's title (required) |
 | `description` | One or two sentences, shown on its card in Host a Game |
+| `icon` | The case's icon, a PNG or JPEG file of its folder, which a toolbox of the case shows; the Write step of Create a Simulation Game makes `icon.png`, 128 by 128 pixels: the initials of the title when the case is created, or a picture chosen with **Choose an Image...**, cropped to a square, with the Pollis badge only when the author ticks it |
 | `rounds` | The number of rounds, 1 to 50 (required) |
 | `round` | What a round is called, such as `"Year"` or `"Quarter"`; `"Round"` when missing |
 | `round_names` | A name for each round, such as `["Due Diligence", "Offers"]`, in place of "Year 2" |
