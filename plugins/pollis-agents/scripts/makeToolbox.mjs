@@ -17,7 +17,8 @@
 // icon.png, README.md), and packages it as <out>/<name>/dist/<name>-<version>.vsix; <out> defaults to the
 // current folder. The folder keeps what the build does not write: the spec, the sources of the vignette and
 // dist/, so a toolbox is one folder (toolboxes/<name>/ in a Pollis Workspace). pack packages a toolbox
-// folder again, e.g. after its README was edited, into its dist/ unless --out names another folder.
+// folder again, e.g. after its README was edited, into its dist/ unless --out names another folder; it
+// packs a toolbox of Simulation Games cases too, whose cases are in games/ (the write-simulation-game skill).
 //
 // Pollis' files are read from https://raw.githubusercontent.com/saragga/pollis/main/ (this plugin
 // lives in another repository, Trumpingtons/pollis-skills): first the panel index
@@ -145,7 +146,7 @@ function tables(value) {
 }
 
 /** What a build writes in a toolbox folder, and all a .vsix holds of it; the folder may keep other files, its spec say. */
-const BUILT = ['package.json', 'README.md', 'icon.png', 'panels', 'wiki', 'notebooks', 'docs'];
+const BUILT = ['package.json', 'README.md', 'icon.png', 'panels', 'wiki', 'notebooks', 'docs', 'games'];
 
 /** Whether `file` is `folder` or inside it. @param {string} file @param {string} folder */
 function isInside(file, folder) {
