@@ -26,7 +26,8 @@ const TOOLBOXES_SOURCE = 'https://raw.githubusercontent.com/Trumpingtons/pollis-
 const TOOLBOXES_PREFIX = 'toolboxes/';
 const INDEX_PATH = 'build/pollis/panel-index.json';
 const PARSER_PATH = 'build/pollis/pollisToml.mjs';
-const REFERENCES_PATH = 'src/vs/workbench/contrib/model/browser/media/references/references.json';
+/** Pollis' References: the data file of PollisReferences.jl on its main branch. */
+const REFERENCES_URL = 'https://raw.githubusercontent.com/Trumpingtons/PollisReferences.jl/main/data/references.json';
 
 /**
  * @typedef {{ [key: string]: unknown }} Table
@@ -92,11 +93,26 @@ export class Source {
 		return index;
 	}
 
-	/** The keys of the works of Pollis' References. @returns {Promise<Set<string>>} */
+	/**
+	 * The keys of the works of Pollis' References: data/references.json of PollisReferences.jl as it is on GitHub, or
+	 * in the clone the variable POLLIS_REFERENCES names, so that a work is known as soon as it is pushed there.
+	 * @returns {Promise<Set<string>>}
+	 */
 	async referenceKeys() {
-		const library = JSON.parse((await this.read(REFERENCES_PATH)).toString('utf-8'));
+		const clone = process.env.POLLIS_REFERENCES;
+		let text;
+		if (clone) {
+			text = fs.readFileSync(path.join(clone, 'data', 'references.json'), 'utf-8');
+		} else {
+			const response = await fetch(REFERENCES_URL);
+			if (!response.ok) {
+				fail(`could not download ${REFERENCES_URL}: ${response.status} ${response.statusText}`);
+			}
+			text = await response.text();
+		}
+		const library = JSON.parse(text);
 		if (!Array.isArray(library.references)) {
-			fail(`${REFERENCES_PATH} has a format this script does not know: update the Pollis Agents plugin`);
+			fail(`${REFERENCES_URL} has a format this script does not know: update the Pollis Agents plugin`);
 		}
 		return new Set(library.references.map((/** @type {{ key: string }} */ work) => work.key));
 	}
