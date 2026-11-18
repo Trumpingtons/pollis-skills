@@ -172,7 +172,7 @@ const REFERENCE_BY_KEY = { key: string(true), title: string(), authors: string()
 /** @type {Shape} */
 const OPTION = { value: string(true), label: string(true), models: strings, when: string() };
 /** @type {Shape} */
-const INPUT = { id: string(true), label: string(true), tooltip: string(), kind: string(), default: { type: 'scalar' }, options: array(OPTION), models: strings, when: string(), newRow: boolean() };
+const INPUT = { id: string(true), label: string(true), tooltip: string(), kind: string(), default: { type: 'scalar' }, options: array(OPTION), models: strings, when: string(), newRow: boolean(), folder: string() };
 /** @type {Shape} */
 const FAQ = { question: string(true), answer: string(true), wiki: string(), hidden: boolean() };
 /** @type {Shape} */
