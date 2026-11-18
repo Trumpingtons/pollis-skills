@@ -179,6 +179,7 @@ label = "Particle Swarm"
 | `when` | a condition on other inputs: `"dim=uni"`, `"method!=quantile"`, `"family=a\|b"`, several joined by `&` |
 | `newRow` | `true` starts a new row |
 | `folder` | a folder input, with Choose... beside it, which opens the folder picker: when a Pollis Workspace is open, the default is this path in it, whose first part is the kind of folder (`data/examples`), otherwise `default`; the code reads it as `expanduser(raw"{{id}}")` |
+| `chooseFolder` | `false` leaves Choose... out beside a `folder` input: a plain text input, whose default still follows the Pollis Workspace |
 | `[[inputs.options]]` | for `select` and `tabs`: `value`, `label`, and optionally `models` and `when` per option |
 
 An option value may appear twice only when each copy has its own `models` or `when` (the same choice, labelled differently per model).
