@@ -221,7 +221,7 @@ The validator checks that every placeholder names an input or `model`, and that 
 
 ## actionGroups
 
-The Next Steps, in this order of groups: Visualise, Diagnose, Predict, Compare, Interpret (use only the groups the panel needs).
+The Next Steps, in this order of groups: Visualise, Diagnose, Predict, Compare, Interpret, then, optional, Replicate and Export (use only the groups the panel needs).
 
 ```toml
 [[actionGroups]]
@@ -244,7 +244,7 @@ scatter(yhat, response(model), xlabel="Fitted", ylabel="Observed", label=false)
 '''
 ```
 
-The group ids are `visualise`, `diagnose`, `predict`, `compare` and `interpret`. An action runs after the Example Code, so it uses its variables. A Compare action must compare two or more things (models, methods, settings), not report one model's statistic.
+The group ids are `visualise`, `diagnose`, `predict`, `compare` and `interpret`, and the optional `replicate` (published results, from R packages or articles, beside Julia's) and `export`. An action runs after the Example Code, so it uses its variables. A Compare action must compare two or more things (models, methods, settings), not report one model's statistic.
 
 ## wikis
 
