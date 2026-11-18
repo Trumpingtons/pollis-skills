@@ -193,6 +193,16 @@ const PANEL = {
 };
 /** @type {Shape} */
 const META = { title: string(true), viewType: string(), defaultModel: string(true), decisionFirstColumn: string() };
+/** The [meta] of a panel in the Time Arrow style: numbered steps in place of models and code. @type {Shape} */
+const TIME_ARROW_META = { title: string(true), viewType: string(), style: string(true), intro: string() };
+/** The tables of a panel in the Time Arrow style, beside meta, wikis and references. @type {Shape} */
+const TIME_ARROW = {
+	packages: array(PACKAGE),
+	requires: { type: 'table', shape: { packages: strings } },
+	matrix: { type: 'table', shape: { columns: { type: 'strings', required: true }, rows: array({ cells: { type: 'strings', required: true } }) } },
+	steps: array({ title: string(true), intro: string(), dataset: string(), datasetText: string(), sections: array({ heading: string(true), text: string(), items: strings }) }, true),
+	faq: array(FAQ),
+};
 /** Sections only a panel with its own code (a template in Pollis) can use. */
 const NEEDS_CODE = { notes: 'notes', explore: 'explore', 'meta.models': 'meta.models' };
 const INPUT_KINDS = ['text', 'select', 'textarea', 'tabs'];
@@ -308,6 +318,26 @@ function placeholders(code) {
 }
 
 /**
+ * Check the wikis and references of a panel: their shapes, and the keys of Pollis' References.
+ * @param {Report} report @param {Table} data @param {{ referenceKeys: Set<string> }} roots
+ */
+function checkWikisAndReferences(report, data, roots) {
+	tables(data.wikis).forEach((wiki, index) => checkShape(report, ['wikis', index], wiki, wiki.separator ? SEPARATOR : WIKI));
+	tables(data.references).forEach((reference, index) => {
+		checkShape(report, ['references', index], reference, reference.separator ? SEPARATOR : 'key' in reference ? REFERENCE_BY_KEY : REFERENCE);
+		if (!reference.separator && typeof reference.key === 'string' && !roots.referenceKeys.has(reference.key)) {
+			report.error(['references', index, 'key'], `Pollis' References has no work with the key ${reference.key}: cite a work it has, or write the reference out (title, authors, year...)`);
+		}
+	});
+	if (data.wikis !== undefined && !Array.isArray(data.wikis)) {
+		report.error(['wikis'], 'must be an array of tables ([[wikis]])');
+	}
+	if (data.references !== undefined && !Array.isArray(data.references)) {
+		report.error(['references'], 'must be an array of tables ([[references]])');
+	}
+}
+
+/**
  * Check a panel TOML.
  * @param {string} file @param {string} text the TOML
  * @param {Parser} parser
@@ -327,6 +357,42 @@ export function validate(file, text, parser, roots) {
 		parser.tomlToPanelData(data);
 	} catch (error) {
 		report.error([], `Pollis cannot read it: ${error instanceof Error ? error.message : String(error)}`);
+		return report;
+	}
+
+	// A panel in the Time Arrow style ([meta] style = "timeArrow"): its steps, then what any panel has
+	if (isTable(data.meta) && data.meta.style !== undefined) {
+		if (data.meta.style !== 'timeArrow') {
+			report.error(['meta', 'style'], `"${data.meta.style}" is not a style Pollis knows: write style = "timeArrow" for numbered steps, or leave it out`);
+			return report;
+		}
+		for (const key of Object.keys(data)) {
+			if (!(key in TIME_ARROW) && !['meta', 'wikis', 'references'].includes(key)) {
+				report.error([key], `a panel in the Time Arrow style has no table ${key} (it knows ${['meta', ...Object.keys(TIME_ARROW), 'wikis', 'references'].join(', ')})`);
+			}
+		}
+		checkShape(report, ['meta'], data.meta, TIME_ARROW_META);
+		for (const [key, field] of Object.entries(TIME_ARROW)) {
+			if (data[key] === undefined) {
+				if (field.required) {
+					report.error([key], `the panel needs [[${key}]]`);
+				}
+			} else {
+				checkField(report, [key], data[key], field);
+			}
+		}
+		const columns = isTable(data.matrix) && Array.isArray(data.matrix.columns) ? data.matrix.columns.length : 0;
+		tables(isTable(data.matrix) ? data.matrix.rows : undefined).forEach((row, index) => {
+			if (Array.isArray(row.cells) && row.cells.length !== columns) {
+				report.error(['matrix', 'rows', index, 'cells'], `has ${row.cells.length} cells for ${columns} columns`);
+			}
+		});
+		tables(data.steps).forEach((step, index) => {
+			if (step.datasetText !== undefined && step.dataset === undefined) {
+				report.warn(['steps', index, 'datasetText'], 'names a dataset without dataset, the id of its entry in Manage Competition Datasets, so it is not a link');
+			}
+		});
+		checkWikisAndReferences(report, data, roots);
 		return report;
 	}
 
@@ -359,19 +425,7 @@ export function validate(file, text, parser, roots) {
 			checkField(report, [key], data[key], field);
 		}
 	}
-	tables(data.wikis).forEach((wiki, index) => checkShape(report, ['wikis', index], wiki, wiki.separator ? SEPARATOR : WIKI));
-	tables(data.references).forEach((reference, index) => {
-		checkShape(report, ['references', index], reference, reference.separator ? SEPARATOR : 'key' in reference ? REFERENCE_BY_KEY : REFERENCE);
-		if (!reference.separator && typeof reference.key === 'string' && !roots.referenceKeys.has(reference.key)) {
-			report.error(['references', index, 'key'], `Pollis' References has no work with the key ${reference.key}: cite a work it has, or write the reference out (title, authors, year...)`);
-		}
-	});
-	if (data.wikis !== undefined && !Array.isArray(data.wikis)) {
-		report.error(['wikis'], 'must be an array of tables ([[wikis]])');
-	}
-	if (data.references !== undefined && !Array.isArray(data.references)) {
-		report.error(['references'], 'must be an array of tables ([[references]])');
-	}
+	checkWikisAndReferences(report, data, roots);
 
 	// The models (tabs): the ids every other table names
 	const models = tables(data.models);
