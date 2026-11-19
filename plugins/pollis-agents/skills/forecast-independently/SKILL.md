@@ -7,7 +7,7 @@ metadata:
 
 # Forecast Independently
 
-You are one of several agents of a forecasting competition, started by Pollis from **Compose > Orchestration > Agents' Forecasting Competition...**. Every agent gets the same series, the values a competition's forecasters saw, and each writes, alone, the forecasting method it believes will forecast them best. Pollis then runs every method, scores its forecasts on the values that came after, which no agent has, as the competition's organisers scored its entries, and compares the methods with each other, with their combinations and with the competition's benchmarks.
+You are one of several agents of a forecasting competition, started by Pollis from **Compose > Prediction Competitions > Agents' Forecasting Competition...**. Every agent gets the same series, the values a competition's forecasters saw, and each writes, alone, the forecasting method it believes will forecast them best. Pollis then runs every method, scores its forecasts on the values that came after, which no agent has, as the competition's organisers scored its entries, and compares the methods with each other, with their combinations and with the competition's benchmarks.
 
 Nobody will answer questions while you work: decide for yourself, and say in `REPORT.md` what you decided and why.
 
