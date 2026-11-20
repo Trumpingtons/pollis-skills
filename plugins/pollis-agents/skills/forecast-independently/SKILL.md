@@ -7,7 +7,7 @@ metadata:
 
 # Forecast Independently
 
-You are one of several agents of a forecasting competition, started by Pollis from **Compose > Prediction Competitions > Agents' Forecasting Competition...**. Every agent gets the same series, the values a competition's forecasters saw, and each writes, alone, the forecasting method it believes will forecast them best. Pollis then runs every method, scores its forecasts on the values that came after, which no agent has, as the competition's organisers scored its entries, and compares the methods with each other, with their combinations and with the competition's benchmarks.
+You are one of several agents of a forecasting competition, started by Pollis from **Compose > Prediction Competitions > Agents' Forecasting Competition...**. Every agent gets the same series, the values the forecasters saw, and each writes, alone, the forecasting method it believes will forecast them best. Pollis then runs every method, scores its forecasts on the values that came after, which no agent has, by sMAPE, MASE and OWA, and compares the methods with each other, with their combinations and with the statistical benchmarks.
 
 Nobody will answer questions while you work: decide for yourself, and say in `REPORT.md` what you decided and why.
 
@@ -23,8 +23,8 @@ Your folder, the one you start in, holds:
 ## Rules
 
 - **Stay in your folder.** Write files only there. Read nothing outside it. Do not look for other agents' folders.
-- **Never look at the values held back.** Do not read `~/.pollis/competitions`, and do not call the data functions of PollisCompetitions (`series`, `observations`, `forecasts`, `scores`, `published_scores`, `download`...): they hold the values your forecasts are scored on and the entries' forecasts. You may use the forecasting functions of `PollisCompetitions.M4Benchmarks` (`ses`, `holt`, `theta`, `is_seasonal`, `seasonal_index`), which forecast from the values you give them.
-- **Do not look up the competition's results**, its entries' forecasts or their scores. You may build on any forecasting method you know, and say so in `REPORT.md`.
+- **Never look at the values held back.** Do not read `~/.pollis/competitions` or the folder `data` of PollisCompetitions, and do not call its data and scoring functions (`series`, `observations`, `table`, `load_dataset`, `connect_db`, `score`, `step_errors`, `benchmarks`...): they hold the values your forecasts are scored on. You may use the forecasting functions of `PollisCompetitions.Benchmarks` (`ses`, `holt`, `theta`, `is_seasonal`, `seasonal_index`, `benchmarks`), which forecast from the values you give them.
+- **Do not look up published results** of these series, or forecasts and scores of them. You may build on any forecasting method you know, and say so in `REPORT.md`.
 - **Run commands only with `julia`**, as `TASK.md` shows; read and write files with your own tools.
 - **Never make up a number.** If the method cannot be made to work, write `REPORT.md` saying what failed, and stop.
 
@@ -35,7 +35,7 @@ Your folder, the one you start in, holds:
    ```julia
    Pollis.packages("StatsBase")   # every package it uses beyond Julia's standard libraries
    using StatsBase
-   using PollisCompetitions.M4Benchmarks: is_seasonal, seasonal_index, theta
+   using PollisCompetitions.Benchmarks: is_seasonal, seasonal_index, theta
 
    """
    h forecasts of the series y (its values in order, a Vector{Float64}), whose seasonal period is period (1 for none).
