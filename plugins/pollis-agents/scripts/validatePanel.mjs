@@ -178,8 +178,11 @@ const FAQ = { question: string(true), answer: string(true), wiki: string(), hidd
 /** @type {Shape} */
 const ACTION = { id: string(true), label: string(true), desc: string(true), code: string(true), models: strings, when: string() };
 
+/** The credentials the panel's code reads from the environment, kept by Pollis in Secret Storage (a toolbox panel's [apiKey]). @type {Field} */
+const API_KEY = { type: 'table', shape: { label: string(true), noun: string(), fields: array({ name: string(true), envVar: string(true), prompt: string(true), password: boolean() }, true) } };
 /** The tables of a panel TOML (meta, wikis and references are checked on their own). @type {Shape} */
 const PANEL = {
+	apiKey: API_KEY,
 	packages: array(PACKAGE, true),
 	requires: { type: 'table', shape: { packages: strings } },
 	notebookSections: array({ label: string(true), notebooks: array(NOTEBOOK, true) }),
@@ -197,6 +200,7 @@ const META = { title: string(true), viewType: string(), defaultModel: string(tru
 const TIME_ARROW_META = { title: string(true), viewType: string(), style: string(true), intro: string() };
 /** The tables of a panel in the Time Arrow style, beside meta, wikis and references. @type {Shape} */
 const TIME_ARROW = {
+	apiKey: API_KEY,
 	packages: array(PACKAGE),
 	requires: { type: 'table', shape: { packages: strings } },
 	matrix: { type: 'table', shape: { columns: { type: 'strings', required: true }, rows: array({ cells: { type: 'strings', required: true } }) } },

@@ -7,7 +7,7 @@ A Pollis panel is one TOML file, plus its wiki pages (Markdown) and notebook tut
 - [The layout of a panel](#the-layout-of-a-panel)
 - [The files](#the-files)
 - [TOML as Pollis reads it](#toml-as-pollis-reads-it)
-- The sections: [meta](#meta), [packages](#packages), [requires](#requires), [models](#models), [bullets](#bullets), [decisionRows](#decisionrows), [inputs](#inputs), [codeBranches](#codebranches), [placeholders and guards](#placeholders-and-guards), [actionGroups](#actiongroups), [wikis](#wikis), [notebookSections](#notebooksections), [references](#references), [faq](#faq)
+- The sections: [meta](#meta), [packages](#packages), [requires](#requires), [apiKey](#apikey), [models](#models), [bullets](#bullets), [decisionRows](#decisionrows), [inputs](#inputs), [codeBranches](#codebranches), [placeholders and guards](#placeholders-and-guards), [actionGroups](#actiongroups), [wikis](#wikis), [notebookSections](#notebooksections), [references](#references), [faq](#faq)
 - [Content rules](#content-rules)
 - [What a toolbox panel cannot do](#what-a-toolbox-panel-cannot-do)
 - [Model panels](#model-panels)
@@ -95,6 +95,32 @@ Further packages the code uses, beyond `[[packages]]`, for the install status on
 [requires]
 packages = ["GLM.jl", "Plots.jl", "Distributions.jl"]
 ```
+
+## apiKey
+
+Credentials the code needs, such as the username and token of a data service. Pollis shows a key on the Powered by line that asks for each field and keeps it in its Secret Storage, encrypted by the operating system, and sets it as an environment variable when the code runs in the Julia REPL. The code reads it with `ENV["..."]`, and never holds it:
+
+```toml
+[apiKey]
+label = "USGS EarthExplorer"
+noun = "credentials"
+
+[[apiKey.fields]]
+name = "usgsUsername"
+envVar = "USGS_USERNAME"
+prompt = "USGS EROS Registration System username"
+password = false
+
+[[apiKey.fields]]
+name = "usgsToken"
+envVar = "USGS_TOKEN"
+prompt = "USGS M2M application token (not the password)"
+```
+
+- `label` (required): the service, shown on the key. `noun`: what the fields are, "API key" by default.
+- `name`: letters and digits, starting with a lower case letter, unique in the panel. Panels of the same toolbox with the same `name` share the value, and a toolbox cannot read the values of another.
+- `envVar`: upper case letters, digits and underscores. `password = false` shows the value as it is typed.
+- Code sent to an editor or a notebook does not receive the values: write an Authentication wiki that says how to set them there.
 
 ## models
 
@@ -382,7 +408,7 @@ A panel in a toolbox is data only: no JavaScript or CSS of its own. So it cannot
 
 - `[notes]` (intro and footnote text on panes) or an `[explore]` pane;
 - `models` in `[meta]`;
-- custom styles, an API key (the Alpha Vantage, FRED and EDGAR panels), or a data connector with its own forms (the Excel, Hugging Face and Kaggle panels).
+- custom styles, or a data connector with its own forms (the Excel, Hugging Face and Kaggle panels).
 
 If a panel needs one of these, say so: it needs a change in Pollis itself.
 
