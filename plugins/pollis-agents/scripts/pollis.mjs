@@ -36,7 +36,7 @@ const REFERENCES_URL = 'https://raw.githubusercontent.com/Trumpingtons/PollisRef
  *   defaultModel?: string; decisionFirstColumn?: string; toml?: string; wikiRoot?: string; notebookRoot?: string;
  *   wikis?: string[]; notebooks?: string[]; packages?: string[] }} IndexPanel
  * @typedef {{ version: number; icon: string; menus: { topLevel: string[]; submenus: string[] }; panels: IndexPanel[] }} PanelIndex
- * @typedef {{ parseToml: (text: string) => Table; tomlToPanelData: (data: Table) => Table }} Parser
+ * @typedef {{ parseToml: (text: string) => Table; tomlToPanelData: (data: Table) => Table; faqProblems: (data: Table) => { errors: string[]; warnings: string[] } }} Parser
  */
 
 /** An error in what the user gave: printed without a stack. */

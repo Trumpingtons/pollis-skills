@@ -18,7 +18,8 @@
 //             id, input id or {{placeholder}} that names nothing, a `when` condition that can never
 //             hold, a duplicate id, a wiki or notebook file that does not exist, a section that only
 //             a panel with its own code can use, an FAQ entry naming a wiki page the panel does not have,
-//             a reference `key` that Pollis' References does not have
+//             a reference `key` that Pollis' References does not have, a closed question of the FAQ
+//             that breaks Pollis' rules for one
 //   warnings  the content rules: literal Greek letters, DataFrames, Zygote, spaces inside
 //             parentheses in labels, a panel without wikis, notebooks or Next Steps, an FAQ that does
 //             not show 2 to 5 entries in Learn More
@@ -170,11 +171,11 @@ const REFERENCE = { title: string(true), authors: string(true), year: { type: 'n
 /** A work of Pollis' References, by its key: Pollis shows the work it has under that key, else the fields written here. @type {Shape} */
 const REFERENCE_BY_KEY = { key: string(true), title: string(), authors: string(), year: { type: 'number' }, journal: string(), doi: string(), url: string(), openAccess: boolean() };
 /** @type {Shape} */
-const OPTION = { value: string(true), label: string(true), models: strings, when: string() };
+const OPTION = { value: string(true), label: string(true), models: strings, when: string(), disabled: boolean() };
 /** @type {Shape} */
 const INPUT = { id: string(true), label: string(true), tooltip: string(), kind: string(), default: { type: 'scalar' }, options: array(OPTION), models: strings, when: string(), newRow: boolean(), folder: string(), chooseFolder: boolean() };
 /** @type {Shape} */
-const FAQ = { question: string(true), answer: string(true), wiki: string(), hidden: boolean() };
+const FAQ = { question: string(true), answer: string(), wiki: string(), hidden: boolean(), right: string(), wrong: strings, explanation: string() };
 /** @type {Shape} */
 const ACTION = { id: string(true), label: string(true), desc: string(true), code: string(true), models: strings, when: string() };
 
@@ -204,7 +205,11 @@ const TIME_ARROW = {
 	packages: array(PACKAGE),
 	requires: { type: 'table', shape: { packages: strings } },
 	matrix: { type: 'table', shape: { columns: { type: 'strings', required: true }, rows: array({ cells: { type: 'strings', required: true } }) } },
-	steps: array({ title: string(true), intro: string(), dataset: string(), datasetText: string(), sections: array({ heading: string(true), text: string(), items: strings }) }, true),
+	steps: array({
+		id: string(), title: string(true), intro: string(), dataset: string(), datasetText: string(), sections: array({ heading: string(true), text: string(), items: strings }),
+		inputs: array(INPUT), code: string(), actions: array(ACTION),
+	}, true),
+	actionGroups: array({ id: string(true), label: string(true), actions: array(ACTION, true) }),
 	faq: array(FAQ),
 };
 /** Sections only a panel with its own code (a template in Pollis) can use. */
@@ -322,6 +327,192 @@ function placeholders(code) {
 }
 
 /**
+ * The checks of a panel's inputs, and of the conditions and code that read them.
+ * @param {Report} report @param {Table[]} inputs those that can be read
+ * @param {(at: KeyPath, list: unknown) => void} checkModels
+ * @param {boolean} [hasModels] false in the Time Arrow style, whose code has no {{model}}
+ */
+function inputChecks(report, inputs, checkModels, hasModels = true) {
+	/** @type {Map<string, Table>} */
+	const inputById = new Map(inputs.map(input => [String(input.id), input]));
+	/** The values an input can take, or undefined when it is free text. @param {string} id */
+	const choices = id => {
+		const input = inputById.get(id);
+		return input && (input.kind === 'select' || input.kind === 'tabs') ? tables(input.options).map(option => String(option.value)) : undefined;
+	};
+	/** @param {KeyPath} at @param {string} id @param {string} op @param {string} values */
+	const checkCondition = (at, id, op, values) => {
+		if (id === 'model' && hasModels) {
+			checkModels(at, values.split('|'));
+			return;
+		}
+		if (!inputById.has(id)) {
+			report.error(at, `the input "${id}" does not exist`);
+			return;
+		}
+		const allowed = choices(id);
+		for (const value of allowed ? values.split('|') : []) {
+			if (!allowed?.includes(value)) {
+				report.error(at, `the input "${id}" has no choice "${value}" (its choices: ${allowed?.join(', ')}), so ${id}${op}${values} ${op === '=' ? 'never holds' : 'always holds'}`);
+			}
+		}
+	};
+	/** @param {KeyPath} at @param {unknown} when */
+	const checkWhen = (at, when) => {
+		if (typeof when !== 'string') {
+			return;
+		}
+		for (const condition of when.split('&')) {
+			const match = /^(?<id>[\w-]+)(?<op>!?=)(?<values>.*)$/.exec(condition);
+			if (!match?.groups) {
+				report.error(at, `"${condition}" is not a condition: write id=value, id!=value, id=a|b, and join several with &`);
+			} else {
+				checkCondition(at, match.groups.id, match.groups.op, match.groups.values);
+			}
+		}
+	};
+	/** @param {KeyPath} at @param {unknown} code */
+	const checkCode = (at, code) => {
+		if (typeof code !== 'string') {
+			return;
+		}
+		for (const placeholder of placeholders(code)) {
+			if (placeholder.guard && placeholder.op) {
+				checkCondition(at, placeholder.id, placeholder.op, placeholder.values ?? '');
+			} else if (!(placeholder.id === 'model' && hasModels) && !inputById.has(placeholder.id)) {
+				report.error(at, `{{${placeholder.id}}} names no input (the inputs: ${[...inputById.keys()].join(', ') || 'none'})`);
+			}
+		}
+		checkContent(report, at, code, 'code');
+	};
+	/** @param {KeyPath} at @param {Table} input */
+	const checkInput = (at, input) => {
+		checkModels([...at, 'models'], input.models);
+		checkWhen([...at, 'when'], input.when);
+		const kind = input.kind ?? 'text';
+		if (typeof kind === 'string' && !INPUT_KINDS.includes(kind)) {
+			report.error([...at, 'kind'], `"${kind}" is not a kind of input (${INPUT_KINDS.join(', ')})`);
+		}
+		const options = tables(input.options);
+		if ((kind === 'select' || kind === 'tabs') && !options.length) {
+			report.error(at, `a ${kind} input needs [[inputs.options]]`);
+		}
+		if ((kind === 'text' || kind === 'textarea') && options.length) {
+			report.error([...at, 'options'], `a ${kind} input has no options: set kind = "select"`);
+		}
+		// A value may come twice when each copy is limited to some models or conditions
+		duplicates(report, options.map(option => option.models || option.when ? {} : option), [...at, 'options'], 'value', 'choice');
+		options.forEach((option, optionIndex) => {
+			checkModels([...at, 'options', optionIndex, 'models'], option.models);
+			checkWhen([...at, 'options', optionIndex, 'when'], option.when);
+			checkContent(report, [...at, 'options', optionIndex, 'label'], option.label, 'label');
+		});
+		if (options.length && input.default !== undefined && !options.some(option => option.value === input.default)) {
+			report.error([...at, 'default'], `"${input.default}" is not one of the choices (${options.map(option => option.value).join(', ')})`);
+		}
+		if (options.length && options.every(option => option.disabled === true)) {
+			report.error([...at, 'options'], 'every choice is disabled, so none can be chosen');
+		} else if (options.some(option => option.disabled === true && option.value === input.default)) {
+			report.error([...at, 'default'], `"${input.default}" is disabled, so it cannot be the default`);
+		}
+		checkContent(report, [...at, 'label'], input.label, 'label');
+		checkContent(report, [...at, 'tooltip'], input.tooltip, 'label');
+	};
+	return { checkWhen, checkCode, checkInput };
+}
+
+/**
+ * Check the inputs and code of the steps of a panel in the Time Arrow style, and its Next Steps. A step reads its own
+ * inputs and those of the steps before it, so that changing one runs no earlier step again; a Next Step reads them all.
+ * @param {Report} report @param {Table} data
+ */
+function checkSteps(report, data) {
+	/** @param {KeyPath} at @param {unknown} list */
+	const checkModels = (at, list) => {
+		if (list !== undefined) {
+			report.error(at, 'a panel in the Time Arrow style has no models: remove it');
+		}
+	};
+	/** @param {KeyPath} at @param {unknown} name */
+	const checkName = (at, name) => {
+		if (typeof name === 'string' && !/^[\w-]+$/.test(name)) {
+			report.error(at, `"${name}" must be letters, digits, _ or -, with no spaces: it names a file`);
+		}
+	};
+	/** @type {Map<string, string>} the names under which the user's versions of the code are kept */
+	const saved = new Map();
+	/** @param {KeyPath} at @param {string} name */
+	const keep = (at, name) => {
+		if (saved.has(name)) {
+			report.error(at, `"${name}" is the name of ${saved.get(name)} too, and the user's versions of their code would share a file`);
+		}
+		saved.set(name, describe(at));
+	};
+	/** @param {KeyPath} at @param {Table} action @param {ReturnType<typeof inputChecks>} checks */
+	const checkAction = (at, action, { checkWhen, checkCode }) => {
+		checkName([...at, 'id'], action.id);
+		keep([...at, 'id'], String(action.id));
+		checkModels([...at, 'models'], action.models);
+		checkWhen([...at, 'when'], action.when);
+		checkCode([...at, 'code'], action.code);
+		checkContent(report, [...at, 'label'], action.label, 'label');
+		checkContent(report, [...at, 'desc'], action.desc, 'label');
+	};
+	/** @type {Table[]} */
+	const known = [];
+	tables(data.steps).forEach((step, index) => {
+		const at = ['steps', index];
+		checkName([...at, 'id'], step.id);
+		if (typeof step.code === 'string' && step.code.trim()) {
+			if (step.id === undefined) {
+				report.error(at, 'a step with code needs id, the name under which the user\'s version of its code is kept');
+			} else {
+				keep([...at, 'id'], `step-${step.id}`);
+			}
+		}
+		const inputs = tables(step.inputs);
+		inputs.forEach((input, inputIndex) => {
+			checkName([...at, 'inputs', inputIndex, 'id'], input.id);
+			if (known.some(other => other.id === input.id)) {
+				report.error([...at, 'inputs', inputIndex, 'id'], `a second input "${input.id}"`);
+			}
+			if (input.id === 'model' || input.kind === 'tabs') {
+				report.error([...at, 'inputs', inputIndex], input.kind === 'tabs' ? 'a step has no tabs input: set kind = "select"' : 'no input can be called model');
+			}
+			known.push(input);
+		});
+		const checks = inputChecks(report, known, checkModels, false);
+		inputs.forEach((input, inputIndex) => checks.checkInput([...at, 'inputs', inputIndex], input));
+		checks.checkCode([...at, 'code'], step.code);
+		tables(step.actions).forEach((action, actionIndex) => checkAction([...at, 'actions', actionIndex], action, checks));
+	});
+	const checks = inputChecks(report, known, checkModels, false);
+	const groups = tables(data.actionGroups);
+	duplicates(report, groups, 'actionGroups', 'id', 'Next Steps group');
+	groups.forEach((group, index) => tables(group.actions).forEach((action, actionIndex) => checkAction(['actionGroups', index, 'actions', actionIndex], action, checks)));
+}
+
+/**
+ * Check the answers of the FAQ: an entry has an answer, or is a closed question (`right`, `wrong`), whose rules are
+ * those Pollis' build has.
+ * @param {Report} report @param {Table} data @param {Parser} parser
+ */
+function checkFaq(report, data, parser) {
+	tables(data.faq).forEach((entry, index) => {
+		const at = ['faq', index];
+		if (entry.right === undefined && entry.wrong === undefined) {
+			if (entry.answer === undefined) {
+				report.error(at, 'needs answer');
+			}
+			return;
+		}
+		const { errors, warnings } = parser.faqProblems({ faq: [entry] });
+		errors.forEach(message => report.error(at, message));
+		warnings.forEach(message => report.warn(at, message));
+	});
+}
+
+/**
  * Check the wikis and references of a panel: their shapes, and the keys of Pollis' References.
  * @param {Report} report @param {Table} data @param {{ referenceKeys: Set<string> }} roots
  */
@@ -396,6 +587,8 @@ export function validate(file, text, parser, roots) {
 				report.warn(['steps', index, 'datasetText'], 'names a dataset without dataset, the id of its entry in Manage Competition Datasets, so it is not a link');
 			}
 		});
+		checkSteps(report, data);
+		checkFaq(report, data, parser);
 		checkWikisAndReferences(report, data, roots);
 		return report;
 	}
@@ -429,6 +622,7 @@ export function validate(file, text, parser, roots) {
 			checkField(report, [key], data[key], field);
 		}
 	}
+	checkFaq(report, data, parser);
 	checkWikisAndReferences(report, data, roots);
 
 	// The models (tabs): the ids every other table names
@@ -468,86 +662,8 @@ export function validate(file, text, parser, roots) {
 	// The inputs: ids, kinds, options and the ids their placeholders and conditions name
 	const inputs = tables(data.inputs);
 	duplicates(report, inputs, 'inputs', 'id', 'input');
-	/** @type {Map<string, Table>} */
-	const inputById = new Map(inputs.map(input => [String(input.id), input]));
-	/** The values an input can take, or undefined when it is free text. @param {string} id */
-	const choices = id => {
-		const input = inputById.get(id);
-		return input && (input.kind === 'select' || input.kind === 'tabs') ? tables(input.options).map(option => String(option.value)) : undefined;
-	};
-	/** @param {KeyPath} at @param {string} id @param {string} op @param {string} values */
-	const checkCondition = (at, id, op, values) => {
-		if (id === 'model') {
-			checkModels(at, values.split('|'));
-			return;
-		}
-		if (!inputById.has(id)) {
-			report.error(at, `the input "${id}" does not exist`);
-			return;
-		}
-		const allowed = choices(id);
-		for (const value of allowed ? values.split('|') : []) {
-			if (!allowed?.includes(value)) {
-				report.error(at, `the input "${id}" has no choice "${value}" (its choices: ${allowed?.join(', ')}), so ${id}${op}${values} ${op === '=' ? 'never holds' : 'always holds'}`);
-			}
-		}
-	};
-	/** @param {KeyPath} at @param {unknown} when */
-	const checkWhen = (at, when) => {
-		if (typeof when !== 'string') {
-			return;
-		}
-		for (const condition of when.split('&')) {
-			const match = /^(?<id>[\w-]+)(?<op>!?=)(?<values>.*)$/.exec(condition);
-			if (!match?.groups) {
-				report.error(at, `"${condition}" is not a condition: write id=value, id!=value, id=a|b, and join several with &`);
-			} else {
-				checkCondition(at, match.groups.id, match.groups.op, match.groups.values);
-			}
-		}
-	};
-	/** @param {KeyPath} at @param {unknown} code */
-	const checkCode = (at, code) => {
-		if (typeof code !== 'string') {
-			return;
-		}
-		for (const placeholder of placeholders(code)) {
-			if (placeholder.guard && placeholder.op) {
-				checkCondition(at, placeholder.id, placeholder.op, placeholder.values ?? '');
-			} else if (placeholder.id !== 'model' && !inputById.has(placeholder.id)) {
-				report.error(at, `{{${placeholder.id}}} names no input (the inputs: ${[...inputById.keys()].join(', ') || 'none'})`);
-			}
-		}
-		checkContent(report, at, code, 'code');
-	};
-	inputs.forEach((input, index) => {
-		const at = ['inputs', index];
-		checkModels([...at, 'models'], input.models);
-		checkWhen([...at, 'when'], input.when);
-		const kind = input.kind ?? 'text';
-		if (typeof kind === 'string' && !INPUT_KINDS.includes(kind)) {
-			report.error([...at, 'kind'], `"${kind}" is not a kind of input (${INPUT_KINDS.join(', ')})`);
-		}
-		const options = tables(input.options);
-		if ((kind === 'select' || kind === 'tabs') && !options.length) {
-			report.error(at, `a ${kind} input needs [[inputs.options]]`);
-		}
-		if ((kind === 'text' || kind === 'textarea') && options.length) {
-			report.error([...at, 'options'], `a ${kind} input has no options: set kind = "select"`);
-		}
-		// A value may come twice when each copy is limited to some models or conditions
-		duplicates(report, options.map(option => option.models || option.when ? {} : option), [...at, 'options'], 'value', 'choice');
-		options.forEach((option, optionIndex) => {
-			checkModels([...at, 'options', optionIndex, 'models'], option.models);
-			checkWhen([...at, 'options', optionIndex, 'when'], option.when);
-			checkContent(report, [...at, 'options', optionIndex, 'label'], option.label, 'label');
-		});
-		if (options.length && input.default !== undefined && !options.some(option => option.value === input.default)) {
-			report.error([...at, 'default'], `"${input.default}" is not one of the choices (${options.map(option => option.value).join(', ')})`);
-		}
-		checkContent(report, [...at, 'label'], input.label, 'label');
-		checkContent(report, [...at, 'tooltip'], input.tooltip, 'label');
-	});
+	const { checkWhen, checkCode, checkInput } = inputChecks(report, inputs, checkModels);
+	inputs.forEach((input, index) => checkInput(['inputs', index], input));
 	branches.forEach((branch, index) => checkCode(['codeBranches', index, 'code'], branch.code));
 
 	// Next Steps
@@ -644,11 +760,11 @@ export function validate(file, text, parser, roots) {
 		}
 	});
 	const shown = faq.filter(entry => entry.hidden !== true).length;
-	const benchmark = 'Besides answering users in Learn More, the FAQ is the panel\'s benchmark for Ask Pollis: Evaluate Answering Models asks its questions from inside the panel and scores the answers, so Ask Pollis can be seen improving at questions about this panel. Entries with hidden = true are only the benchmark and are never shown';
+	const benchmark = 'A question with hidden = true is never shown: it is a closed question, with right and wrong in place of answer, of the Panel FAQ test set by which Evaluate Answering Models scores Ask Pollis on this panel';
 	if (shown < 2) {
 		report.warn(['faq'], `${shown ? 'the panel has one FAQ entry' : 'the panel has no FAQ'}: add 2 to 5 questions a user is likely to ask, as [[faq]] with question, answer and the wiki page the answer comes from. ${benchmark}`);
 	} else if (shown > 5) {
-		report.warn(['faq'], `the panel shows ${shown} FAQ entries in Learn More, and 2 to 5 are suggested: set hidden = true on the rest. ${benchmark}, so the hidden entries still count without crowding Learn More`);
+		report.warn(['faq'], `the panel shows ${shown} FAQ entries in Learn More, and 2 to 5 are suggested: remove the rest, or rewrite them as closed questions. ${benchmark}`);
 	}
 	return report;
 }

@@ -363,33 +363,54 @@ A work Pollis' References already has can be cited by its key alone, `key = "Hil
 
 ## faq
 
-The questions a user of the panel is most likely to ask, with their answers, shown first in Learn More:
+Two kinds of entries: a shown one is a question with its answer, first in Learn More, and a hidden one is a closed question, which tests Ask Pollis and is never shown.
 
 ```toml
 [[faq]]
 question = "How many replicates should I use?"
-answer = """About 1,000 replicates are enough for a standard error, and about 2,000 to 10,000 for the percentile, basic and BCa intervals, which depend on the tails of the replicates.
+answer = '''
+About 1,000 replicates are enough for a standard error, and about 2,000 to 10,000 for the percentile, basic and BCa intervals, which depend on the tails of the replicates. The studentised interval also needs a nested bootstrap inside each replicate, the panel's Inner Replicates (often 50 to 200), which multiplies the cost.
 
-Required Replicates shows how the standard error and the interval endpoints settle as replicates are added."""
+Required Replicates shows how the standard error and the interval endpoints settle as replicates are added: if the endpoints still move in the second significant digit, use more.
+'''
 # the wiki page the answer comes from, by its name in [[wikis]]
 wiki = "Assumptions"
 
 [[faq]]
-question = "Why is the BCa interval not symmetric around the estimate?"
-answer = "..."
-wiki = "Interpretation"
-# only the benchmark, never shown
+question = "Which action of the Bootstrap Resampling panel shows whether a single observation dominates the estimate?"
+right = "Jackknife Influence"
+wrong = ["Replicate Histogram", "Replicate Shape", "Required Replicates", "Interval Coverage", "Width vs Sample Size"]
+explanation = "Jackknife Influence recomputes the statistic leaving out one observation at a time: one whose removal moves the estimate far more than the others dominates the result."
+wiki = "Diagnostics"
+# a closed question, never shown
 hidden = true
 ```
 
-`question` and `answer` are required. An answer is plain text: a blank line starts a new paragraph, and `backticks` mark code. `wiki` names one of the panel's `[[wikis]]`, and Learn More links to it under the answer.
+| | Shown | Hidden (`hidden = true`) |
+|---|---|---|
+| Required | `question`, `answer` | `question`, `right`, `wrong` |
+| Optional | `wiki` | `wiki`, `explanation` |
+| Never | `right`, `wrong` | `answer` |
+| Where it goes | Learn More | The Panel FAQ test set of Evaluate Answering Models |
 
-Besides answering users, the FAQ is the panel's benchmark for Ask Pollis: Evaluate Answering Models asks its questions from inside the panel, the hidden ones too, and scores the answers against the panel's own, so Ask Pollis can be seen improving at questions about the panel. Ask Pollis never reads the FAQ, so the answers must come from the wiki pages, where Ask Pollis can find them. So:
+A hidden entry with `answer` in place of `right` and `wrong` is left out of the test set, and the validator does not report it: always write a hidden entry as a closed question.
 
-- Show 2 to 5 entries in Learn More: the validator warns when a panel shows fewer or more, and the panel still passes. Set `hidden = true` on the rest.
+`wiki` names one of the panel's `[[wikis]]`. Learn More links to it under a shown answer, and the test set uses it to check that Ask Pollis found the passage that answers a hidden question. Ask Pollis never reads the FAQ, so every answer must be in the wiki pages, where Ask Pollis can find it.
+
+For a shown entry:
+
+- Show 2 to 5 entries: the validator warns when a panel shows fewer or more, and the panel still passes.
 - Ask what a user of the panel would ask, in their words: a choice between the models, a setting of the inputs, a result to read.
-- Answer from one wiki page, named by `wiki`, in 40 to 150 words, with the panel's exact labels.
-- Hidden entries can ask more precisely: a step of a derivation, a pitfall, a number from a table of the wiki.
+- Answer from one wiki page in 40 to 150 words, with the panel's exact labels. An answer is plain text: a blank line starts a new paragraph, and `backticks` mark code.
+
+For a hidden entry:
+
+- Ask what the panel itself says: its defaults, the thresholds of its diagnostics, what its actions show, which of its packages does what, what its decision table recommends. A question any textbook answers tests what a model learned in training, not what it read in the panel.
+- Name the panel in the question, and ask nothing that a shown answer already gives away.
+- Give 4 to 10 options, `right` among them, with `wrong` a list on one line. The models see them lettered, in an order of their own.
+- Make each wrong option plausible to someone who has not read the wiki, and false by that wiki.
+- Keep each option to 200 characters, with none empty or repeated, and none that does not choose, such as "All of the above" or "Both A and B". The validator rejects these.
+- Keep the right option within one and a half times the length of the longest wrong one, as models learn to pick the longest, and give an `explanation` of why it is right. The validator warns about both.
 
 ## Content rules
 
