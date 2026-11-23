@@ -180,7 +180,7 @@ const FAQ = { question: string(true), answer: string(), wiki: string(), hidden: 
 const ACTION = { id: string(true), label: string(true), desc: string(true), code: string(true), models: strings, when: string() };
 
 /** The credentials the panel's code reads from the environment, kept by Pollis in Secret Storage (a toolbox panel's [apiKey]). @type {Field} */
-const API_KEY = { type: 'table', shape: { label: string(true), noun: string(), fields: array({ name: string(true), envVar: string(true), prompt: string(true), password: boolean() }, true) } };
+const API_KEY = { type: 'table', shape: { label: string(true), noun: string(), fields: array({ name: string(true), envVar: string(true), prompt: string(true), label: string(), password: boolean() }, true) } };
 /** The tables of a panel TOML (meta, wikis and references are checked on their own). @type {Shape} */
 const PANEL = {
 	apiKey: API_KEY,

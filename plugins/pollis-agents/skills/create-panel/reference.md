@@ -118,8 +118,9 @@ prompt = "USGS M2M application token (not the password)"
 ```
 
 - `label` (required): the service, shown on the key. `noun`: what the fields are, "API key" by default.
-- `name`: letters and digits, starting with a lower case letter, unique in the panel. Panels of the same toolbox with the same `name` share the value, and a toolbox cannot read the values of another.
-- `envVar`: upper case letters, digits and underscores. `password = false` shows the value as it is typed.
+- `name`: letters and digits, starting with a lower case letter, unique in the panel.
+- `envVar`: upper case letters, digits and underscores. The value is the user's key for that variable, kept on their computer and shared by every panel of Pollis and of the toolboxes that names it. `password = false` shows the value as it is typed.
+- `label`: a short name for the field, such as "Google Maps key", which the Powered by line shows when a panel has several keys, each set and cleared by itself; the `prompt` otherwise.
 - Code sent to an editor or a notebook does not receive the values: write an Authentication wiki that says how to set them there.
 
 ## models
