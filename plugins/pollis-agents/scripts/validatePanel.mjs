@@ -146,7 +146,7 @@ function isValue(value) {
 
 /**
  * A field: its type, and whether the TOML must give it.
- * @typedef {{ type: 'string' | 'number' | 'boolean' | 'strings' | 'scalar'; required?: boolean } | { type: 'array'; item: Shape; required?: boolean } | { type: 'table'; shape: Shape; required?: boolean }} Field
+ * @typedef {{ type: 'string' | 'number' | 'boolean' | 'strings' | 'scalar' | 'version'; required?: boolean } | { type: 'array'; item: Shape; required?: boolean } | { type: 'table'; shape: Shape; required?: boolean }} Field
  * @typedef {{ [key: string]: Field }} Shape
  */
 
@@ -155,13 +155,15 @@ const string = required => ({ type: 'string', required });
 /** @type {(required?: boolean) => Field} */
 const boolean = required => ({ type: 'boolean', required });
 const strings = /** @type {Field} */ ({ type: 'strings' });
+/** A package version, three numbers: "0.1.6". */
+const version = /** @type {Field} */ ({ type: 'version' });
 /** @type {(item: Shape, required?: boolean) => Field} */
 const array = (item, required) => ({ type: 'array', item, required });
 
 /** @type {Shape} */
 const VIDEO = { title: string(true), description: string(), url: string(true) };
 /** @type {Shape} */
-const PACKAGE = { name: string(true), github: string(true), fork: boolean(), license: string(), videos: array(VIDEO) };
+const PACKAGE = { name: string(true), github: string(true), fork: boolean(), minimum: version, license: string(), videos: array(VIDEO) };
 /** @type {Shape} */
 const NOTEBOOK = { name: string(true), description: string(), file: string(), url: string(), bundled: boolean() };
 /** @type {Shape} */
@@ -312,6 +314,11 @@ function checkField(report, at, value, field) {
 		case 'scalar':
 			if (!['string', 'number', 'boolean'].includes(typeof value)) {
 				report.error(at, `must be a string, number or boolean, not ${JSON.stringify(value)}`);
+			}
+			break;
+		case 'version':
+			if (typeof value !== 'string' || !/^\d+\.\d+\.\d+$/.test(value)) {
+				report.error(at, `must be a version of three numbers, like "0.1.6", not ${JSON.stringify(value)}`);
 			}
 			break;
 		case 'strings':

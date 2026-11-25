@@ -87,6 +87,8 @@ url = "https://www.youtube.com/watch?v=..."
 
 `name` and `github` are required. `fork = true` installs the package from `github` instead of the Julia registry. Use it only for a package that is not registered.
 
+`minimum = "0.1.6"` is the oldest version of the package the panel's code works with: before the code runs, Pollis upgrades a version older than that to it or a later one of the same major version, keeping the other packages' versions. Give it when the code calls a function or uses a topic that an older version does not have.
+
 ## requires
 
 Further packages the code uses, beyond `[[packages]]`, for the install status only (Plots.jl, Distributions.jl, ...):
