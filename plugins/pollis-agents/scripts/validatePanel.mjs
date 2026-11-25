@@ -19,10 +19,12 @@
 //             hold, a duplicate id, a wiki or notebook file that does not exist, a section that only
 //             a panel with its own code can use, an FAQ entry naming a wiki page the panel does not have,
 //             a reference `key` that Pollis' References does not have, a closed question of the FAQ
-//             that breaks Pollis' rules for one
+//             that breaks Pollis' rules for one; in the Minimal style, a row field that names no
+//             column, a link that is not https://, a {{placeholder}} (the style has no inputs)
 //   warnings  the content rules: literal Greek letters, DataFrames, Zygote, spaces inside
 //             parentheses in labels, a panel without wikis, notebooks or Next Steps, an FAQ that does
-//             not show 2 to 5 entries in Learn More
+//             not show 2 to 5 entries in Learn More (the last three only in the Classical style: Next
+//             Steps and Learn More are optional in the Time Arrow and Minimal styles)
 // The wiki and notebook files named by `file` are looked for in <dir>/wiki/ and <dir>/notebooks/
 // next to the TOML, or in ../wiki/ and ../notebooks/ (a toolbox's panels/ folder), unless --wiki and
 // --notebooks give the folders. Exit status: 0 when there are no errors, 1 otherwise.
@@ -212,6 +214,20 @@ const TIME_ARROW = {
 	actionGroups: array({ id: string(true), label: string(true), actions: array(ACTION, true) }),
 	faq: array(FAQ),
 };
+/** The [meta] of a panel in the Minimal style: a table of rows, each with its code, in place of models and code. @type {Shape} */
+const MINIMAL_META = { title: string(true), viewType: string(), style: string(true), intro: string(), rowTitle: string() };
+/** The tables of a panel in the Minimal style, beside meta, rows (whose fields follow the columns), wikis and references. @type {Shape} */
+const MINIMAL = {
+	apiKey: API_KEY,
+	packages: array(PACKAGE),
+	requires: { type: 'table', shape: { packages: strings } },
+	notebookSections: array({ label: string(true), notebooks: array(NOTEBOOK, true) }),
+	columns: array({ id: string(true), label: string(true) }),
+	actionGroups: array({ id: string(true), label: string(true), actions: array(ACTION, true) }),
+	faq: array(FAQ),
+};
+/** The fields of a row of a Minimal panel besides its value, and link, in each column. */
+const ROW_FIELDS = ['id', 'title', 'subtitle', 'description', 'code'];
 /** Sections only a panel with its own code (a template in Pollis) can use. */
 const NEEDS_CODE = { notes: 'notes', explore: 'explore', 'meta.models': 'meta.models' };
 const INPUT_KINDS = ['text', 'select', 'textarea', 'tabs'];
@@ -493,6 +509,88 @@ function checkSteps(report, data) {
 }
 
 /**
+ * Check a panel in the Minimal style: its table, whose columns name the fields of its rows, the code of each row, and
+ * its Next Steps, which are optional, as Learn More is. Nothing in it reads an input, so no code has {{placeholders}}.
+ * @param {Report} report @param {Table} data
+ */
+function checkMinimal(report, data) {
+	/** @param {KeyPath} at @param {unknown} name @param {string} what */
+	const checkName = (at, name, what) => {
+		if (typeof name === 'string' && !/^[\w-]+$/.test(name)) {
+			report.error(at, `"${name}" must be letters, digits, _ or -, with no spaces: Pollis leaves out a ${what} whose id is not`);
+		}
+	};
+	/** @param {KeyPath} at @param {unknown} code */
+	const checkCode = (at, code) => {
+		if (typeof code !== 'string') {
+			return;
+		}
+		for (const placeholder of placeholders(code)) {
+			report.error(at, `{{${placeholder.id}}}: a panel in the Minimal style has no inputs, so its code is shown as it is written`);
+		}
+		checkContent(report, at, code, 'code');
+	};
+	const columns = tables(data.columns);
+	duplicates(report, columns, 'columns', 'id', 'column');
+	columns.forEach((column, index) => {
+		checkName(['columns', index, 'id'], column.id, 'column');
+		const id = String(column.id);
+		if (ROW_FIELDS.includes(id) || id.endsWith('Url') || columns.some(other => `${other.id}Url` === id)) {
+			report.error(['columns', index, 'id'], `"${id}" is a field of every row (${ROW_FIELDS.join(', ')}) or the link of a column: name the column otherwise`);
+		}
+		checkContent(report, ['columns', index, 'label'], column.label, 'label');
+	});
+	const columnIds = [...new Set(columns.map(column => String(column.id)))];
+	/** @type {Shape} */
+	const row = { id: string(true), title: string(true), subtitle: string(), description: string(), code: string() };
+	for (const id of columnIds) {
+		row[id] = string();
+		row[`${id}Url`] = string();
+	}
+	if (!Array.isArray(data.rows)) {
+		report.error(['rows'], data.rows === undefined ? 'the panel needs [[rows]]' : 'must be an array of tables ([[rows]])');
+	}
+	const rows = tables(data.rows);
+	duplicates(report, rows, 'rows', 'id', 'row');
+	rows.forEach((entry, index) => {
+		const at = ['rows', index];
+		checkShape(report, at, entry, row);
+		checkName([...at, 'id'], entry.id, 'row');
+		for (const id of columnIds) {
+			const url = entry[`${id}Url`];
+			if (typeof url === 'string' && !url.startsWith('https://')) {
+				report.error([...at, `${id}Url`], 'Pollis links only to https:// addresses, and shows the cell without its link');
+			}
+			if (url !== undefined && entry[id] === undefined) {
+				report.error([...at, `${id}Url`], `a link without its text: give ${id} too`);
+			}
+		}
+		checkCode([...at, 'code'], entry.code);
+		for (const key of ['title', 'subtitle', 'description']) {
+			checkContent(report, [...at, key], entry[key], 'label');
+		}
+	});
+	/** @param {KeyPath} at @param {unknown} list */
+	const checkModels = (at, list) => {
+		if (list !== undefined) {
+			report.error(at, 'a panel in the Minimal style has no models: remove it');
+		}
+	};
+	const groups = tables(data.actionGroups);
+	duplicates(report, groups, 'actionGroups', 'id', 'Next Steps group');
+	groups.forEach((group, index) => tables(group.actions).forEach((action, actionIndex) => {
+		const at = ['actionGroups', index, 'actions', actionIndex];
+		checkModels([...at, 'models'], action.models);
+		if (action.when !== undefined) {
+			report.error([...at, 'when'], 'a panel in the Minimal style has no inputs for a condition to read: remove it');
+		}
+		checkCode([...at, 'code'], action.code);
+		checkContent(report, [...at, 'label'], action.label, 'label');
+		checkContent(report, [...at, 'desc'], action.desc, 'label');
+	}));
+}
+
+/**
  * Check the answers of the FAQ: an entry has an answer, or is a closed question (`right`, `wrong`), whose rules are
  * those Pollis' build has.
  * @param {Report} report @param {Table} data @param {Parser} parser
@@ -555,10 +653,29 @@ export function validate(file, text, parser, roots) {
 		return report;
 	}
 
+	// A panel in the Minimal style ([meta] style = "minimal"): its table of rows, then what any panel has
+	if (isTable(data.meta) && data.meta.style === 'minimal') {
+		for (const key of Object.keys(data)) {
+			if (!(key in MINIMAL) && !['meta', 'rows', 'wikis', 'references'].includes(key)) {
+				report.error([key], `a panel in the Minimal style has no table ${key} (it knows ${['meta', ...Object.keys(MINIMAL), 'rows', 'wikis', 'references'].join(', ')})`);
+			}
+		}
+		checkShape(report, ['meta'], data.meta, MINIMAL_META);
+		for (const [key, field] of Object.entries(MINIMAL)) {
+			if (data[key] !== undefined) {
+				checkField(report, [key], data[key], field);
+			}
+		}
+		checkMinimal(report, data);
+		checkFaq(report, data, parser);
+		checkWikisAndReferences(report, data, roots);
+		return report;
+	}
+
 	// A panel in the Time Arrow style ([meta] style = "timeArrow"): its steps, then what any panel has
 	if (isTable(data.meta) && data.meta.style !== undefined) {
 		if (data.meta.style !== 'timeArrow') {
-			report.error(['meta', 'style'], `"${data.meta.style}" is not a style Pollis knows: write style = "timeArrow" for numbered steps, or leave it out`);
+			report.error(['meta', 'style'], `"${data.meta.style}" is not a style Pollis knows: write style = "timeArrow" for numbered steps, style = "minimal" for a table of rows each with its code, or leave it out`);
 			return report;
 		}
 		for (const key of Object.keys(data)) {
