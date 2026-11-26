@@ -206,7 +206,7 @@ const TIME_ARROW_META = { title: string(true), viewType: string(), style: string
 /** A numbered step, of a panel in the Time Arrow style or of a row of one in the Minimal style. @type {Shape} */
 const STEP = {
 	id: string(), title: string(true), intro: string(), dataset: string(), datasetText: string(), sections: array({ heading: string(true), text: string(), items: strings }),
-	inputs: array(INPUT), code: string(), actions: array(ACTION),
+	inputs: array(INPUT), code: string(), needs: strings, actions: array(ACTION),
 };
 /** The tables of a panel in the Time Arrow style, beside meta, wikis and references. @type {Shape} */
 const TIME_ARROW = {
@@ -465,6 +465,14 @@ function checkStepList(report, steps, at, prefix, { checkModels, checkName, keep
 			} else {
 				keep([...stepAt, 'id'], `${prefix}${step.id}`);
 			}
+		}
+		// The steps it needs, when not all those before it: each one of them
+		if (Array.isArray(step.needs)) {
+			step.needs.forEach((id, needIndex) => {
+				if (!steps.slice(0, index).some(other => other.id === id)) {
+					report.error([...stepAt, 'needs', needIndex], `"${id}" is not the id of a step before this one`);
+				}
+			});
 		}
 		const inputs = tables(step.inputs);
 		inputs.forEach((input, inputIndex) => {
