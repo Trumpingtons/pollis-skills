@@ -203,16 +203,18 @@ const PANEL = {
 const META = { title: string(true), viewType: string(), defaultModel: string(true), decisionFirstColumn: string() };
 /** The [meta] of a panel in the Time Arrow style: numbered steps in place of models and code. @type {Shape} */
 const TIME_ARROW_META = { title: string(true), viewType: string(), style: string(true), intro: string() };
+/** A numbered step, of a panel in the Time Arrow style or of a row of one in the Minimal style. @type {Shape} */
+const STEP = {
+	id: string(), title: string(true), intro: string(), dataset: string(), datasetText: string(), sections: array({ heading: string(true), text: string(), items: strings }),
+	inputs: array(INPUT), code: string(), actions: array(ACTION),
+};
 /** The tables of a panel in the Time Arrow style, beside meta, wikis and references. @type {Shape} */
 const TIME_ARROW = {
 	apiKey: API_KEY,
 	packages: array(PACKAGE),
 	requires: { type: 'table', shape: { packages: strings } },
 	matrix: { type: 'table', shape: { columns: { type: 'strings', required: true }, rows: array({ cells: { type: 'strings', required: true } }) } },
-	steps: array({
-		id: string(), title: string(true), intro: string(), dataset: string(), datasetText: string(), sections: array({ heading: string(true), text: string(), items: strings }),
-		inputs: array(INPUT), code: string(), actions: array(ACTION),
-	}, true),
+	steps: array(STEP, true),
 	actionGroups: array({ id: string(true), label: string(true), actions: array(ACTION, true) }),
 	faq: array(FAQ),
 };
@@ -229,7 +231,7 @@ const MINIMAL = {
 	faq: array(FAQ),
 };
 /** The fields of a row of a Minimal panel besides its value, and link, in each column. */
-const ROW_FIELDS = ['id', 'title', 'subtitle', 'description', 'code'];
+const ROW_FIELDS = ['id', 'title', 'subtitle', 'description', 'code', 'steps'];
 /** Sections only a panel with its own code (a template in Pollis) can use. */
 const NEEDS_CODE = { notes: 'notes', explore: 'explore', 'meta.models': 'meta.models' };
 const INPUT_KINDS = ['text', 'select', 'textarea', 'tabs'];
@@ -445,6 +447,45 @@ function inputChecks(report, inputs, checkModels, hasModels = true) {
 }
 
 /**
+ * Check a list of numbered steps: a step reads its own inputs and those of the steps before it in the list.
+ * @param {Report} report @param {Table[]} steps @param {KeyPath} at where the list is
+ * @param {string} prefix of the names under which the user's versions of the steps' code are kept
+ * @param {{ checkModels: (at: KeyPath, list: unknown) => void; checkName: (at: KeyPath, name: unknown) => void; keep: (at: KeyPath, name: string) => void; checkAction: (at: KeyPath, action: Table, checks: ReturnType<typeof inputChecks>) => void }} checkers
+ * @returns {Table[]} the inputs of all the steps
+ */
+function checkStepList(report, steps, at, prefix, { checkModels, checkName, keep, checkAction }) {
+	/** @type {Table[]} */
+	const known = [];
+	steps.forEach((step, index) => {
+		const stepAt = [...at, index];
+		checkName([...stepAt, 'id'], step.id);
+		if (typeof step.code === 'string' && step.code.trim()) {
+			if (step.id === undefined) {
+				report.error(stepAt, 'a step with code needs id, the name under which the user\'s version of its code is kept');
+			} else {
+				keep([...stepAt, 'id'], `${prefix}${step.id}`);
+			}
+		}
+		const inputs = tables(step.inputs);
+		inputs.forEach((input, inputIndex) => {
+			checkName([...stepAt, 'inputs', inputIndex, 'id'], input.id);
+			if (known.some(other => other.id === input.id)) {
+				report.error([...stepAt, 'inputs', inputIndex, 'id'], `a second input "${input.id}"`);
+			}
+			if (input.id === 'model' || input.kind === 'tabs') {
+				report.error([...stepAt, 'inputs', inputIndex], input.kind === 'tabs' ? 'a step has no tabs input: set kind = "select"' : 'no input can be called model');
+			}
+			known.push(input);
+		});
+		const checks = inputChecks(report, known, checkModels, false);
+		inputs.forEach((input, inputIndex) => checks.checkInput([...stepAt, 'inputs', inputIndex], input));
+		checks.checkCode([...stepAt, 'code'], step.code);
+		tables(step.actions).forEach((action, actionIndex) => checkAction([...stepAt, 'actions', actionIndex], action, checks));
+	});
+	return known;
+}
+
+/**
  * Check the inputs and code of the steps of a panel in the Time Arrow style, and its Next Steps. A step reads its own
  * inputs and those of the steps before it, so that changing one runs no earlier step again; a Next Step reads them all.
  * @param {Report} report @param {Table} data
@@ -481,34 +522,7 @@ function checkSteps(report, data) {
 		checkContent(report, [...at, 'label'], action.label, 'label');
 		checkContent(report, [...at, 'desc'], action.desc, 'label');
 	};
-	/** @type {Table[]} */
-	const known = [];
-	tables(data.steps).forEach((step, index) => {
-		const at = ['steps', index];
-		checkName([...at, 'id'], step.id);
-		if (typeof step.code === 'string' && step.code.trim()) {
-			if (step.id === undefined) {
-				report.error(at, 'a step with code needs id, the name under which the user\'s version of its code is kept');
-			} else {
-				keep([...at, 'id'], `step-${step.id}`);
-			}
-		}
-		const inputs = tables(step.inputs);
-		inputs.forEach((input, inputIndex) => {
-			checkName([...at, 'inputs', inputIndex, 'id'], input.id);
-			if (known.some(other => other.id === input.id)) {
-				report.error([...at, 'inputs', inputIndex, 'id'], `a second input "${input.id}"`);
-			}
-			if (input.id === 'model' || input.kind === 'tabs') {
-				report.error([...at, 'inputs', inputIndex], input.kind === 'tabs' ? 'a step has no tabs input: set kind = "select"' : 'no input can be called model');
-			}
-			known.push(input);
-		});
-		const checks = inputChecks(report, known, checkModels, false);
-		inputs.forEach((input, inputIndex) => checks.checkInput([...at, 'inputs', inputIndex], input));
-		checks.checkCode([...at, 'code'], step.code);
-		tables(step.actions).forEach((action, actionIndex) => checkAction([...at, 'actions', actionIndex], action, checks));
-	});
+	const known = checkStepList(report, tables(data.steps), ['steps'], 'step-', { checkModels, checkName, keep, checkAction });
 	const checks = inputChecks(report, known, checkModels, false);
 	const groups = tables(data.actionGroups);
 	duplicates(report, groups, 'actionGroups', 'id', 'Next Steps group');
@@ -517,7 +531,8 @@ function checkSteps(report, data) {
 
 /**
  * Check a panel in the Minimal style: its table, whose columns name the fields of its rows, the code of each row, and
- * its Next Steps, which are optional, as Learn More is. Nothing in it reads an input, so no code has {{placeholders}}.
+ * its Next Steps, which are optional, as Learn More is. Only the numbered steps of a row ([[rows.steps]]) have inputs,
+ * so only their code has {{placeholders}}.
  * @param {Report} report @param {Table} data
  */
 function checkMinimal(report, data) {
@@ -549,7 +564,7 @@ function checkMinimal(report, data) {
 	});
 	const columnIds = [...new Set(columns.map(column => String(column.id)))];
 	/** @type {Shape} */
-	const row = { id: string(true), title: string(true), subtitle: string(), description: string(), code: string() };
+	const row = { id: string(true), title: string(true), subtitle: string(), description: string(), code: string(), steps: array(STEP) };
 	for (const id of columnIds) {
 		row[id] = string();
 		row[`${id}Url`] = string();
@@ -557,6 +572,41 @@ function checkMinimal(report, data) {
 	if (!Array.isArray(data.rows)) {
 		report.error(['rows'], data.rows === undefined ? 'the panel needs [[rows]]' : 'must be an array of tables ([[rows]])');
 	}
+	/** @type {Map<string, string>} the names under which the user's versions of the rows' steps' code are kept */
+	const saved = new Map();
+	/**
+	 * Check the numbered steps of a row, which read their own inputs and those of the row's steps before them.
+	 * @param {KeyPath} at @param {Table} entry
+	 */
+	const checkRowSteps = (at, entry) => {
+		const steps = tables(entry.steps);
+		if (!steps.length) {
+			return;
+		}
+		if (typeof entry.code === 'string') {
+			report.error([...at, 'code'], 'a row has code or [[rows.steps]], not both: Pollis shows only the steps');
+		}
+		checkStepList(report, steps, [...at, 'steps'], `row-${entry.id}-step-`, {
+			checkModels: (modelsAt, list) => {
+				if (list !== undefined) {
+					report.error(modelsAt, 'a panel in the Minimal style has no models: remove it');
+				}
+			},
+			checkName: (nameAt, name) => checkName(nameAt, name, 'step'),
+			keep: (keepAt, name) => {
+				if (saved.has(name)) {
+					report.error(keepAt, `"${name}" is the name of ${saved.get(name)} too, and the user's versions of their code would share a file`);
+				}
+				saved.set(name, describe(keepAt));
+			},
+			checkAction: (actionAt, action, checks) => {
+				checks.checkWhen([...actionAt, 'when'], action.when);
+				checks.checkCode([...actionAt, 'code'], action.code);
+				checkContent(report, [...actionAt, 'label'], action.label, 'label');
+				checkContent(report, [...actionAt, 'desc'], action.desc, 'label');
+			},
+		});
+	};
 	const rows = tables(data.rows);
 	duplicates(report, rows, 'rows', 'id', 'row');
 	rows.forEach((entry, index) => {
@@ -573,6 +623,7 @@ function checkMinimal(report, data) {
 			}
 		}
 		checkCode([...at, 'code'], entry.code);
+		checkRowSteps(at, entry);
 		for (const key of ['title', 'subtitle', 'description']) {
 			checkContent(report, [...at, key], entry[key], 'label');
 		}
